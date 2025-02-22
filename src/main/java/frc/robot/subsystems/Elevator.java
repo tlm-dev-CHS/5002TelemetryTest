@@ -5,6 +5,7 @@ import static edu.wpi.first.wpilibj2.command.Commands.sequence;
 import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
 
 import java.lang.ModuleLayer.Controller;
+import java.util.function.BooleanSupplier;
 
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
@@ -41,6 +42,8 @@ public class Elevator extends SubsystemBase{
     static TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(6, 3);
     
     ProfiledPIDController controller = new ProfiledPIDController(0.5, 0, 0, constraints);
+
+    Double factor = 0.0;
     
     public Elevator(){
         
@@ -48,13 +51,13 @@ public class Elevator extends SubsystemBase{
 
         mainConfig
             .idleMode(IdleMode.kBrake)
-            .smartCurrentLimit(15)
+            .smartCurrentLimit(80)
         .encoder
             .positionConversionFactor(OperatorConstants.elvatorConversionFactor)
             .velocityConversionFactor(OperatorConstants.elvatorConversionFactor/60);
             
         followerConfig
-            .follow(m_elevator)
+            .follow(m_elevator, true)
             .idleMode(IdleMode.kBrake)
             .smartCurrentLimit(15)
         .encoder
@@ -101,8 +104,12 @@ public class Elevator extends SubsystemBase{
         return m_elevator.getOutputCurrent();
     }
 
+    public BooleanSupplier atTop(){
+        return () -> getAmps() > 35.0;
+    }
+
     public void calibrate(){
-        Double factor = getMeasurement();
+        factor = getMeasurement();
         factor = 17.5 / getMeasurement();
 
         mainConfig.alternateEncoder
@@ -113,13 +120,13 @@ public class Elevator extends SubsystemBase{
                 .positionConversionFactor(factor)
                 .velocityConversionFactor(factor/60);
 
-        SmartDashboard.putNumber("Conversion Factor", factor);
-
     }
 
     @Override
     public void periodic(){
         SmartDashboard.putNumber("Elevator Position", encoder.getPosition());
+        SmartDashboard.putNumber("Elevator Amps", getAmps());
+        SmartDashboard.putNumber("Conversion Factor", factor);
     }
 
 

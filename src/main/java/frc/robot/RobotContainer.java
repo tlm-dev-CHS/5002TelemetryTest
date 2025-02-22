@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -18,10 +19,12 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator;
 
 import static edu.wpi.first.wpilibj2.command.Commands.none;
+import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static edu.wpi.first.wpilibj2.command.Commands.sequence;
 import static edu.wpi.first.wpilibj2.command.Commands.waitSeconds;
@@ -44,13 +47,18 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final Elevator elevator = new Elevator();
+    public final Arm arm = new Arm();
 
     public SendableChooser<Boolean> calibrationMode = new SendableChooser<>();
+    private final SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
         calibrationMode.setDefaultOption("Competition", false);
         calibrationMode.addOption("Calibration", true);
 
+        autoChooser = AutoBuilder.buildAutoChooser("Test Auto");
+
+        SmartDashboard.putData("Auto Mode", autoChooser);
         SmartDashboard.putData("Mode", calibrationMode);
 
         configureBindings();
@@ -62,13 +70,13 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                drive.withVelocityX(joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
                     .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
 
-        joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+        
     
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
@@ -80,16 +88,22 @@ public class RobotContainer {
         // reset the field-centric heading on left bumper press
         joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-        if(calibrationMode.equals(true)){
-            joystick.a().onTrue(calibrateElevator());
+        if(calibrationMode.getSelected().booleanValue() == true){
+            
           }
           else{
             joystick.povDown().onTrue(elevatorDown());
       
             joystick.povRight().onTrue(elevatorMid());
       
-            joystick.povUp().onTrue(elevatorUp());
+            joystick.povUp().whileTrue(elevatorUp());
 
+            joystick.b().onTrue(stopElevator());
+
+
+            //joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+
+            joystick.a().onTrue(calibrateElevator());
             //joystick.leftTrigger().onTrue(intake());
             }
 
@@ -106,23 +120,31 @@ public class RobotContainer {
   }
 
   public Command elevatorUp(){
-    return runOnce(()-> {elevator.moveToPosition(28.0);}, elevator);
+    return run(()-> {elevator.setMotor(0.75);}, elevator);
+  }
+
+  public Command stopElevator(){
+    return run(()-> {elevator.stopMotor();}, elevator);
   }
 
   //Calibrates the Elevator conversion factor from the bottom. MAKE SURE IT STARTS AT THE BOTTOM
   public Command calibrateElevator(){
     return sequence(
       runOnce(() -> {elevator.zeroEncoder();}, elevator),
-      runOnce(() -> {elevator.setMotor(0.25);}, elevator),
-      waitUntil(() -> elevator.getAmps() > 12.0),
+      runOnce(() -> {elevator.setMotor(0.35);}, elevator),
+      waitUntil(elevator.atTop()),
       runOnce(() -> {elevator.stopMotor();}, elevator),
       runOnce(() -> {elevator.calibrate();}, elevator),
       elevator.moveToPosition(0.0)
     );
   }
 
+  public Command ArmSide(){
+    return run(()->{arm.moveToPosition(60.0);}, arm).until(arm.atGoal());
+  }
 
-    public Command getAutonomousCommand() {
-        return Commands.print("No autonomous command configured");
-    }
+
+  public Command getAutonomousCommand() {
+    return autoChooser.getSelected();
+  }
 }

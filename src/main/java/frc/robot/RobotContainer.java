@@ -70,8 +70,8 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
                     .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
@@ -87,12 +87,15 @@ public class RobotContainer {
 
         // reset the field-centric heading on left bumper press
         joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        joystick.x().onTrue(ArmSide());
+        joystick.rightTrigger().onTrue(calibrateArm());
+        joystick.leftTrigger().onTrue(ArmSide());
 
         if(calibrationMode.getSelected().booleanValue() == true){
-            
+          
           }
           else{
-            joystick.povDown().onTrue(elevatorDown());
+            joystick.y().onTrue(elevatorDown());
       
             joystick.povRight().onTrue(elevatorMid());
       
@@ -100,11 +103,16 @@ public class RobotContainer {
 
             joystick.b().onTrue(stopElevator());
 
+            joystick.a().onTrue(calibrateElevator());
+
 
             //joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
 
-            joystick.a().onTrue(calibrateElevator());
+            
             //joystick.leftTrigger().onTrue(intake());
+
+            elevator.setDefaultCommand(elevator.runElevator());
+
             }
 
         drivetrain.registerTelemetry(logger::telemeterize);
@@ -139,8 +147,17 @@ public class RobotContainer {
     );
   }
 
+  public Command calibrateArm(){
+    return sequence(
+      runOnce(() -> {arm.zero();}, arm)
+    );
+  }
+
   public Command ArmSide(){
-    return run(()->{arm.moveToPosition(60.0);}, arm).until(arm.atGoal());
+    return run(()->{arm.moveToPosition(60.0);}, arm);
+  }
+  public Command stopArm(){
+    return runOnce(()->{arm.stop();});
   }
 
 

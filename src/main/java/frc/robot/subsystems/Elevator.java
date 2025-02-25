@@ -16,6 +16,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.ExponentialProfile.State;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -42,13 +43,12 @@ public class Elevator extends SubsystemBase{
     static TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(6, 3);
     
     ProfiledPIDController controller = new ProfiledPIDController(0.5, 0, 0, constraints);
+    ElevatorFeedforward feedforward = new ElevatorFeedforward(OperatorConstants.eks, OperatorConstants.ekg, OperatorConstants.ekv);
 
     Double factor = 0.0;
     
     public Elevator(){
         
-        SmartDashboard.putData("Elevator PID", controller);
-
         mainConfig
             .idleMode(IdleMode.kBrake)
             .smartCurrentLimit(80)
@@ -59,7 +59,7 @@ public class Elevator extends SubsystemBase{
         followerConfig
             .follow(m_elevator, true)
             .idleMode(IdleMode.kBrake)
-            .smartCurrentLimit(15)
+            .smartCurrentLimit(80)
         .encoder
             .positionConversionFactor(OperatorConstants.elvatorConversionFactor)
             .velocityConversionFactor(OperatorConstants.elvatorConversionFactor/60);
@@ -69,19 +69,19 @@ public class Elevator extends SubsystemBase{
 
         controller.setTolerance(0.25);
         controller.setGoal(0.0);
-        controller.enableContinuousInput(0, 1);
+        controller.enableContinuousInput(0, 12);
     }
 
     //moves the elevator to a position in inches
     public Command moveToPosition(Double position){
-        return sequence(
-            runOnce(()->{controller.setGoal(position);}),
-            run(()->{runElevator();}).until(controller::atGoal)
-        );
+        return runOnce(()->{controller.setGoal(position);});
     }
 
-    public void runElevator(){
-        m_elevator.set(controller.calculate(getMeasurement(), controller.getGoal()));
+    public Command runElevator(){
+        return run(()->{
+            double desiredSpeed = controller.calculate(getMeasurement(), controller.getGoal());
+            desiredSpeed = feedforward.calculate(desiredSpeed);
+            m_elevator.set(desiredSpeed);});
     }
 
     public void setMotor(Double speed){
@@ -126,7 +126,8 @@ public class Elevator extends SubsystemBase{
     public void periodic(){
         SmartDashboard.putNumber("Elevator Position", encoder.getPosition());
         SmartDashboard.putNumber("Elevator Amps", getAmps());
-        SmartDashboard.putNumber("Conversion Factor", factor);
+        SmartDashboard.putNumber("Elevator Conversion Factor", factor);
+        SmartDashboard.putData("Elevator PID", controller);
     }
 
 

@@ -17,6 +17,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.ExponentialProfile.State;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -39,13 +40,12 @@ public class Elevator extends SubsystemBase{
     SparkMaxConfig followerConfig = new SparkMaxConfig();
 
     final RelativeEncoder encoder = m_elevator.getEncoder();
-
-    static TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(6, 3);
     
-    ProfiledPIDController controller = new ProfiledPIDController(0.5, 0, 0, constraints);
+    PIDController controller = new PIDController(0.5, 0, 0);
     ElevatorFeedforward feedforward = new ElevatorFeedforward(OperatorConstants.eks, OperatorConstants.ekg, OperatorConstants.ekv);
 
     Double factor = 0.0;
+    Double goal = 0.0;
     
     public Elevator(){
         
@@ -67,20 +67,19 @@ public class Elevator extends SubsystemBase{
         m_elevator.configure(mainConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         m_follower.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        controller.setTolerance(0.25);
-        controller.setGoal(0.0);
+        controller.setTolerance(0.5);
         controller.enableContinuousInput(0, 12);
     }
 
     //moves the elevator to a position in inches
-    public Command moveToPosition(Double position){
-        return runOnce(()->{controller.setGoal(position);});
+    public void moveToPosition(Double position){
+        goal = position;
     }
 
     public Command runElevator(){
         return run(()->{
-            double desiredSpeed = controller.calculate(getMeasurement(), controller.getGoal());
-            desiredSpeed = feedforward.calculate(desiredSpeed);
+            double desiredSpeed = controller.calculate(getMeasurement(), goal);
+            desiredSpeed = desiredSpeed + feedforward.calculate(14, 10);
             m_elevator.set(desiredSpeed);});
     }
 
@@ -105,21 +104,17 @@ public class Elevator extends SubsystemBase{
     }
 
     public BooleanSupplier atTop(){
+        System.out.println("TOP");
         return () -> getAmps() > 35.0;
     }
 
     public void calibrate(){
         factor = getMeasurement();
-        factor = 17.5 / getMeasurement();
+        factor = 28 / getMeasurement();
+    }
 
-        mainConfig.alternateEncoder
-                .positionConversionFactor(factor)
-                .velocityConversionFactor(factor/60);
-
-        followerConfig.alternateEncoder
-                .positionConversionFactor(factor)
-                .velocityConversionFactor(factor/60);
-
+    public BooleanSupplier atGoal(){
+        return ()->(getMeasurement() <= (goal + 0.25) && getMeasurement() >= (goal - 0.25));
     }
 
     @Override
@@ -129,6 +124,5 @@ public class Elevator extends SubsystemBase{
         SmartDashboard.putNumber("Elevator Conversion Factor", factor);
         SmartDashboard.putData("Elevator PID", controller);
     }
-
 
 }

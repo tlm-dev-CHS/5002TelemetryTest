@@ -48,9 +48,9 @@ public final class Constants
     public final int beamBreakId = 0;
 
     //Elevator feedforward
-    public final static double eks = 2;
-    public final static double ekg = 0;
-    public final static double ekv = 0;
+    public final static double eks = 0;
+    public final static double ekg = 0.5;
+    public final static double ekv = 0.2;
   }
 
   public static final class RobotConstants{

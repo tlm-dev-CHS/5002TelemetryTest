@@ -91,8 +91,8 @@ public class RobotContainer {
         joystick.rightTrigger().onTrue(calibrateArm());
         joystick.leftTrigger().onTrue(ArmSide());
 
-        if(calibrationMode.getSelected().booleanValue() == true){
-          
+        if(calibrationMode.getSelected() == true){
+          joystick.a().onTrue(calibrateElevator());
           }
           else{
             joystick.y().onTrue(elevatorDown());
@@ -102,9 +102,6 @@ public class RobotContainer {
             joystick.povUp().whileTrue(elevatorUp());
 
             joystick.b().onTrue(stopElevator());
-
-            joystick.a().onTrue(calibrateElevator());
-
 
             //joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
 
@@ -143,7 +140,8 @@ public class RobotContainer {
       waitUntil(elevator.atTop()),
       runOnce(() -> {elevator.stopMotor();}, elevator),
       runOnce(() -> {elevator.calibrate();}, elevator),
-      elevator.moveToPosition(0.0)
+      runOnce(()->{elevator.moveToPosition(0.0);}),
+      run(()->elevator.runElevator(), elevator).until(elevator.atGoal())
     );
   }
 

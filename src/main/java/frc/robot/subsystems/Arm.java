@@ -17,6 +17,7 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -38,14 +39,13 @@ public class Arm extends SubsystemBase {
     final RelativeEncoder encoder = m_armRotator.getEncoder();
     final AbsoluteEncoder rotatorAbsoluteEncoder = m_armRotator.getAbsoluteEncoder();
 
-    static TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(6, 3);
-    ProfiledPIDController controller = new ProfiledPIDController(0.5, 0, 0, constraints);
+    PIDController controller = new PIDController(0.5, 0, 0);
 
     double factor = 0.0;
 
     public Arm(){
         rotatorConfig
-            .idleMode(IdleMode.kCoast)
+            .idleMode(IdleMode.kBrake)
             .inverted(true)
 
         .encoder
@@ -60,13 +60,12 @@ public class Arm extends SubsystemBase {
         m_armShooter.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         controller.setTolerance(1);
-        controller.setGoal(0);
     }
 
     public Command moveToPosition(Double position){
         return sequence(
-            runOnce(()->{controller.setGoal(position);}),
-            run(()->{run();}).until(controller::atGoal)
+            runOnce(()->{controller.setSetpoint(factor);}),
+            run(()->{run();}).until(atGoal())
         );
     }
 
@@ -75,7 +74,7 @@ public class Arm extends SubsystemBase {
     }
 
     public void run(){
-        m_armRotator.set(controller.calculate(getMeasurement(), controller.getGoal()));
+        m_armRotator.set(controller.calculate(getMeasurement(), controller.getSetpoint()));
     }
     
     public void runMotor(double d){
@@ -91,7 +90,7 @@ public class Arm extends SubsystemBase {
     }
 
     public BooleanSupplier atGoal(){
-        return controller :: atGoal;
+        return () -> controller.atSetpoint();
     }
 
     public void stop(){

@@ -7,6 +7,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix.sensors.PigeonIMU.CalibrationMode;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 
@@ -49,22 +50,27 @@ public class RobotContainer {
     public final Elevator elevator = new Elevator();
     public final Arm arm = new Arm();
 
-    public SendableChooser<Boolean> calibrationMode = new SendableChooser<>();
+    public SendableChooser<Boolean> calibrationMode = new SendableChooser<Boolean>();
     private final SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
+        
+      autoChooser = AutoBuilder.buildAutoChooser("Test Auto");
+      configureBindings();
+
+        
+    }
+
+    private void configureBindings() {
         calibrationMode.setDefaultOption("Competition", false);
         calibrationMode.addOption("Calibration", true);
-
-        autoChooser = AutoBuilder.buildAutoChooser("Test Auto");
 
         SmartDashboard.putData("Auto Mode", autoChooser);
         SmartDashboard.putData("Mode", calibrationMode);
 
-        configureBindings();
-    }
-
-    private void configureBindings() {
+        if(calibrationMode.getSelected() == null){
+          System.out.println("NO MODE");
+        }
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
@@ -77,7 +83,7 @@ public class RobotContainer {
         );
 
         
-    
+
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
         joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
@@ -91,24 +97,30 @@ public class RobotContainer {
         joystick.rightTrigger().onTrue(calibrateArm());
         joystick.leftTrigger().onTrue(ArmSide());
 
-        if(calibrationMode.getSelected() == true){
+        
+
+        if(calibrationMode.getSelected()){
+          System.out.println("CALIBRATING");
           joystick.a().onTrue(calibrateElevator());
           }
-          else{
-            joystick.y().onTrue(elevatorDown());
-      
-            joystick.povRight().onTrue(elevatorMid());
-      
-            joystick.povUp().whileTrue(elevatorUp());
+        else{
+          joystick.y().onTrue(elevatorTop());
+    
+          joystick.povRight().onTrue(elevatorMid());
 
-            joystick.b().onTrue(stopElevator());
+          joystick.povDown().whileTrue(elevatorDown());
+    
+          joystick.povUp().whileTrue(elevatorUp());
 
-            //joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+          joystick.b().onTrue(stopElevator());
 
-            
-            //joystick.leftTrigger().onTrue(intake());
+          //joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
 
-            elevator.setDefaultCommand(elevator.runElevator());
+          
+          //joystick.leftTrigger().onTrue(intake());
+
+          
+          elevator.setDefaultCommand(elevator.runElevator());
 
             }
 
@@ -117,7 +129,11 @@ public class RobotContainer {
 
      //Moves elevator to different positions, will be revised
   public Command elevatorDown(){
-    return runOnce(()-> {elevator.moveToPosition(0.0);}, elevator);
+    return run(()-> {elevator.setMotor(-0.3);}, elevator);
+  }
+
+  public Command elevatorTop(){
+    return runOnce(()-> {elevator.moveToPosition(27.0);}, elevator);
   }
 
   public Command elevatorMid(){
@@ -125,7 +141,7 @@ public class RobotContainer {
   }
 
   public Command elevatorUp(){
-    return run(()-> {elevator.setMotor(0.75);}, elevator);
+    return run(()-> {elevator.setMotor(0.3);}, elevator);
   }
 
   public Command stopElevator(){
@@ -136,12 +152,11 @@ public class RobotContainer {
   public Command calibrateElevator(){
     return sequence(
       runOnce(() -> {elevator.zeroEncoder();}, elevator),
-      runOnce(() -> {elevator.setMotor(0.35);}, elevator),
-      waitUntil(elevator.atTop()),
+      run(() -> {elevator.setMotor(0.35);}, elevator).until
+      (elevator.atTop()),
+      runOnce(()->{System.out.println(elevator.getAmps());}),
       runOnce(() -> {elevator.stopMotor();}, elevator),
-      runOnce(() -> {elevator.calibrate();}, elevator),
-      runOnce(()->{elevator.moveToPosition(0.0);}),
-      run(()->elevator.runElevator(), elevator).until(elevator.atGoal())
+      runOnce(() -> {elevator.calibrate();}, elevator)
     );
   }
 
@@ -157,7 +172,6 @@ public class RobotContainer {
   public Command stopArm(){
     return runOnce(()->{arm.stop();});
   }
-
 
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();

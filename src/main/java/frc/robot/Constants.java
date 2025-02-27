@@ -33,7 +33,7 @@ public final class Constants
     public final static int m_elevator = 2;
     public final static int m_elevatorFollower = 6;
     
-    public final static double elvatorConversionFactor = 0.3712147387;
+    public final static double elvatorConversionFactor = 0.59635;
 
     //Arm Motor controllers
     public final static int m_armRotator = 15;
@@ -48,9 +48,6 @@ public final class Constants
     public final int beamBreakId = 0;
 
     //Elevator feedforward
-    public final static double eks = 0;
-    public final static double ekg = 0.5;
-    public final static double ekv = 0.2;
   }
 
   public static final class RobotConstants{

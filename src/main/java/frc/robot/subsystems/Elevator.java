@@ -21,6 +21,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.ExponentialProfile.State;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ProfiledPIDSubsystem;
@@ -41,8 +42,9 @@ public class Elevator extends SubsystemBase{
 
     final RelativeEncoder encoder = m_elevator.getEncoder();
     
-    PIDController controller = new PIDController(0.5, 0, 0);
-    ElevatorFeedforward feedforward = new ElevatorFeedforward(OperatorConstants.eks, OperatorConstants.ekg, OperatorConstants.ekv);
+    PIDController controller = new PIDController(2, 0, 0);
+
+    ElevatorFeedforward feedforward = new ElevatorFeedforward(0, 0.5, 0.2);
 
     Double factor = 0.0;
     Double goal = 0.0;
@@ -51,7 +53,7 @@ public class Elevator extends SubsystemBase{
         
         mainConfig
             .idleMode(IdleMode.kBrake)
-            .smartCurrentLimit(80)
+            .smartCurrentLimit(200)
         .encoder
             .positionConversionFactor(OperatorConstants.elvatorConversionFactor)
             .velocityConversionFactor(OperatorConstants.elvatorConversionFactor/60);
@@ -59,7 +61,7 @@ public class Elevator extends SubsystemBase{
         followerConfig
             .follow(m_elevator, true)
             .idleMode(IdleMode.kBrake)
-            .smartCurrentLimit(80)
+            .smartCurrentLimit(200)
         .encoder
             .positionConversionFactor(OperatorConstants.elvatorConversionFactor)
             .velocityConversionFactor(OperatorConstants.elvatorConversionFactor/60);
@@ -67,20 +69,23 @@ public class Elevator extends SubsystemBase{
         m_elevator.configure(mainConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         m_follower.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        controller.setTolerance(0.5);
+        controller.reset();
+
+        controller.setTolerance(0.25);
         controller.enableContinuousInput(0, 12);
     }
 
     //moves the elevator to a position in inches
     public void moveToPosition(Double position){
+        controller.reset();
         goal = position;
     }
 
     public Command runElevator(){
         return run(()->{
             double desiredSpeed = controller.calculate(getMeasurement(), goal);
-            desiredSpeed = desiredSpeed + feedforward.calculate(14, 10);
-            m_elevator.set(desiredSpeed);});
+            //desiredSpeed = desiredSpeed + feedforward.calculate(1, 1);
+            m_elevator.setVoltage(desiredSpeed);});
     }
 
     public void setMotor(Double speed){
@@ -104,8 +109,7 @@ public class Elevator extends SubsystemBase{
     }
 
     public BooleanSupplier atTop(){
-        System.out.println("TOP");
-        return () -> getAmps() > 35.0;
+        return () -> getAmps() > 100.0;
     }
 
     public void calibrate(){
@@ -114,7 +118,7 @@ public class Elevator extends SubsystemBase{
     }
 
     public BooleanSupplier atGoal(){
-        return ()->(getMeasurement() <= (goal + 0.25) && getMeasurement() >= (goal - 0.25));
+        return ()->(controller.atSetpoint());
     }
 
     @Override
@@ -122,6 +126,7 @@ public class Elevator extends SubsystemBase{
         SmartDashboard.putNumber("Elevator Position", encoder.getPosition());
         SmartDashboard.putNumber("Elevator Amps", getAmps());
         SmartDashboard.putNumber("Elevator Conversion Factor", factor);
+    //    SmartDashboard.putData("Elevator FeedForward", (Sendable) feedforward);
         SmartDashboard.putData("Elevator PID", controller);
     }
 

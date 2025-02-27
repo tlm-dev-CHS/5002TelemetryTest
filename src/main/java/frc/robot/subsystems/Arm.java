@@ -39,7 +39,7 @@ public class Arm extends SubsystemBase {
     final RelativeEncoder encoder = m_armRotator.getEncoder();
     final AbsoluteEncoder rotatorAbsoluteEncoder = m_armRotator.getAbsoluteEncoder();
 
-    PIDController controller = new PIDController(0.5, 0, 0);
+    PIDController m_controller = new PIDController(0.5, 0, 0);
 
     double factor = 0.0;
 
@@ -54,13 +54,13 @@ public class Arm extends SubsystemBase {
         
         m_armRotator.configure(rotatorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        controller.setTolerance(1);
+        m_controller.setTolerance(1);
     }
 
     public Command moveToPosition(Double position){
         return sequence(
-            runOnce(()->{controller.setSetpoint(factor);}),
-            run(()->{run();}).until(atGoal())
+            runOnce(()->{m_controller.setSetpoint(position);}),
+            run(()->{runArm();}).until(atGoal())
         );
     }
 
@@ -68,8 +68,8 @@ public class Arm extends SubsystemBase {
         return encoder.getPosition();
     }
 
-    public void run(){
-        m_armRotator.set(controller.calculate(getMeasurement(), controller.getSetpoint()));
+    public void runArm(){
+        m_armRotator.set(m_controller.calculate(getMeasurement(), m_controller.getSetpoint()));
     }
     
     public void runMotor(double d){
@@ -77,7 +77,7 @@ public class Arm extends SubsystemBase {
     }
 
     public BooleanSupplier atGoal(){
-        return () -> controller.atSetpoint();
+        return () -> (m_controller.atSetpoint());
     }
 
     public void stop(){
@@ -101,7 +101,9 @@ public class Arm extends SubsystemBase {
 
     @Override
     public void periodic(){
-        SmartDashboard.putNumber("Arm position", getMeasurement());
-        SmartDashboard.putNumber("Arm Conversion Factor", factor);
+        SmartDashboard.putNumber("Arm Position", getMeasurement());
+        SmartDashboard.putNumber("Arm Setpoint", m_controller.getSetpoint());
+        SmartDashboard.putNumber("Arm Output", m_controller.calculate(getMeasurement()));
+        SmartDashboard.putBoolean("Arm At Goal", m_controller.atSetpoint());
     }
 }

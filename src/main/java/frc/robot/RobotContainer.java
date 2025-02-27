@@ -90,7 +90,8 @@ public class RobotContainer {
         joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         
         joystick.x().onTrue(ArmSide());
-        joystick.rightTrigger().onTrue(calibrateArm());
+        joystick.rightBumper().onTrue(calibrateArm());
+        joystick.rightTrigger().onTrue(ArmUp());
         joystick.leftTrigger().onTrue(ArmSide());
 
         if(mode.getSelected() == true){
@@ -171,6 +172,13 @@ public class RobotContainer {
     return run(()->{arm.moveToPosition(60.0);}, arm);
   }
 
+  public Command ArmUp(){
+    return run(()->{arm.moveToPosition(120.0);},arm);
+  }
+
+  //public Command setArmPoint(){
+    //return runOnce(()->{arm.m_controller.seSetpoint()}, null)''
+  //}
   public Command stopArm(){
     return runOnce(()->{arm.stop();});
   }

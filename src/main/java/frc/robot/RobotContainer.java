@@ -50,27 +50,30 @@ public class RobotContainer {
     public final Elevator elevator = new Elevator();
     public final Arm arm = new Arm();
 
-    public SendableChooser<Boolean> calibrationMode = new SendableChooser<Boolean>();
+    public SendableChooser<Boolean> mode = new SendableChooser<Boolean>();
     private final SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
+
+      mode.setDefaultOption("Calibrate", true);
+      mode.addOption("Comp", false);
+
+      SmartDashboard.putData("Mode", mode);
+
+        if(mode.getSelected() == null){
+          System.out.println("NO MODE");
+        }
         
       autoChooser = AutoBuilder.buildAutoChooser("Test Auto");
+      SmartDashboard.putData("Auto Mode", autoChooser);
+
       configureBindings();
 
         
     }
 
     private void configureBindings() {
-        calibrationMode.setDefaultOption("Competition", false);
-        calibrationMode.addOption("Calibration", true);
-
-        SmartDashboard.putData("Auto Mode", autoChooser);
-        SmartDashboard.putData("Mode", calibrationMode);
-
-        if(calibrationMode.getSelected() == null){
-          System.out.println("NO MODE");
-        }
+        
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
@@ -97,9 +100,8 @@ public class RobotContainer {
         joystick.rightTrigger().onTrue(calibrateArm());
         joystick.leftTrigger().onTrue(ArmSide());
 
-        if(calibrationMode.getSelected()){
+        if(mode.getSelected() == true){
           System.out.println("CALIBRATING");
-          
           }
         else{
           joystick.a().onTrue(calibrateElevator());

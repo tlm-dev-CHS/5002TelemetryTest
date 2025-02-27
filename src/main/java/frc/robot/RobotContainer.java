@@ -56,7 +56,7 @@ public class RobotContainer {
     public RobotContainer() {
 
       mode.setDefaultOption("Calibrate", true);
-      mode.addOption("Comp", false);
+      mode.addOption("Competition", false);
 
       SmartDashboard.putData("Mode", mode);
 

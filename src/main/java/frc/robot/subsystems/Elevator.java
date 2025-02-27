@@ -72,7 +72,6 @@ public class Elevator extends SubsystemBase{
         controller.reset();
 
         controller.setTolerance(0.25);
-        controller.enableContinuousInput(0, 12);
     }
 
     //moves the elevator to a position in inches

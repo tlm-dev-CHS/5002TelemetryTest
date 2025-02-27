@@ -97,13 +97,12 @@ public class RobotContainer {
         joystick.rightTrigger().onTrue(calibrateArm());
         joystick.leftTrigger().onTrue(ArmSide());
 
-        
-
         if(calibrationMode.getSelected()){
           System.out.println("CALIBRATING");
-          joystick.a().onTrue(calibrateElevator());
+          
           }
         else{
+          joystick.a().onTrue(calibrateElevator());
           joystick.y().onTrue(elevatorTop());
     
           joystick.povRight().onTrue(elevatorMid());
@@ -128,9 +127,7 @@ public class RobotContainer {
     }
 
      //Moves elevator to different positions, will be revised
-  public Command elevatorDown(){
-    return run(()-> {elevator.setMotor(-0.3);}, elevator);
-  }
+  
 
   public Command elevatorTop(){
     return runOnce(()-> {elevator.moveToPosition(27.0);}, elevator);
@@ -140,8 +137,16 @@ public class RobotContainer {
     return runOnce(()-> {elevator.moveToPosition(14.0);}, elevator);
   }
 
+  public Command elevatorBottom(){
+    return runOnce(()-> {elevator.moveToPosition(1.0);}, elevator);
+  }
+
   public Command elevatorUp(){
     return run(()-> {elevator.setMotor(0.3);}, elevator);
+  }
+
+  public Command elevatorDown(){
+    return run(()-> {elevator.setMotor(-0.3);}, elevator);
   }
 
   public Command stopElevator(){

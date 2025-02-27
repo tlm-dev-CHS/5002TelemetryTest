@@ -57,15 +57,22 @@ public class Arm extends SubsystemBase {
         m_controller.setTolerance(1);
     }
 
-    public Command moveToPosition(Double position){
-        return sequence(
+    public Command moveToPosition(Double dposition){
+
+        return runOnce(()->{setPosition(dposition);});
+
+        /**return sequence(
             runOnce(()->{m_controller.setSetpoint(position);}),
             run(()->{runArm();}).until(atGoal())
-        );
+        );**/
     }
 
     public double getMeasurement(){
         return encoder.getPosition();
+    }
+
+    public void setPosition(double position){
+        m_controller.setSetpoint(position);
     }
 
     public void runArm(){
@@ -82,16 +89,6 @@ public class Arm extends SubsystemBase {
 
     public void stop(){
         m_armRotator.set(0.0);
-    }
-
-    public void calibrate(){
-        factor = getMeasurement();
-        factor = 90 / getMeasurement();
-
-        rotatorConfig.alternateEncoder
-                .positionConversionFactor(factor)
-                .velocityConversionFactor(factor/60);
-
     }
 
     public void zero(){

@@ -50,8 +50,9 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final Elevator elevator = new Elevator();
     public final Arm arm = new Arm();
-    public SendableChooser<Boolean> modeChooser = new SendableChooser<>();
-    public SendableChooser<Boolean> calibrationMode = new SendableChooser<Boolean>();
+    public final Intake intake = new Intake();
+
+    public SendableChooser<Boolean> mode = new SendableChooser<Boolean>();
     private final SendableChooser<Command> autoChooser;
    
 
@@ -75,60 +76,55 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        calibrationMode.setDefaultOption("Competition", false);
-        calibrationMode.addOption("Calibration", true);
 
-        SmartDashboard.putData("Auto Mode", autoChooser);
-        SmartDashboard.putData("Mode", calibrationMode);
+      if(mode.getSelected() == null){
+        System.out.println("NO MODE");
+      }
+      // Note that X is defined as forward according to WPILib convention,
+      // and Y is defined as to the left according to WPILib convention.
+      drivetrain.setDefaultCommand(
+          // Drivetrain will execute this command periodically
+          drivetrain.applyRequest(() ->
+              drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                  .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                  .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+          )
+      );
 
-        if(calibrationMode.getSelected() == null){
-          System.out.println("NO MODE");
+      joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+      
+      joystick.x().onTrue(ArmSide());
+      joystick.rightBumper().onTrue(calibrateArm());
+      joystick.rightTrigger().onTrue(ArmUp());
+      joystick.leftTrigger().onTrue(ArmSide());
+
+      if(mode.getSelected() == true){
+        System.out.println("CALIBRATING");
+        joystick.a().onTrue(calibrateElevator());
         }
-        // Note that X is defined as forward according to WPILib convention,
-        // and Y is defined as to the left according to WPILib convention.
-        drivetrain.setDefaultCommand(
-            // Drivetrain will execute this command periodically
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
-            )
-        );
-
-        joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+      else{
         
-        joystick.x().onTrue(ArmSide());
-        joystick.rightBumper().onTrue(calibrateArm());
-        joystick.rightTrigger().onTrue(ArmUp());
-        joystick.leftTrigger().onTrue(ArmSide());
+        joystick.povRight().onTrue(elevatorMid());
 
-        if(mode.getSelected() == true){
-          System.out.println("CALIBRATING");
-          joystick.a().onTrue(calibrateElevator());
+        joystick.povDown().whileTrue(elevatorBottom());
+  
+        joystick.povUp().whileTrue(elevatorTop());
+
+        joystick.b().onTrue(stopElevator());
+
+        //joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+
+        
+        //joystick.leftTrigger().onTrue(intake());
+
+        
+        elevator.setDefaultCommand(elevator.runElevator());
+        arm.setDefaultCommand(arm.runArm());
+
           }
-        else{
-          
-          joystick.povRight().onTrue(elevatorMid());
 
-          joystick.povDown().whileTrue(elevatorBottom());
-    
-          joystick.povUp().whileTrue(elevatorTop());
-
-          joystick.b().onTrue(stopElevator());
-
-          //joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-
-          
-          //joystick.leftTrigger().onTrue(intake());
-
-          
-          elevator.setDefaultCommand(elevator.runElevator());
-          arm.setDefaultCommand(arm.runArm());
-
-            }
-
-        drivetrain.registerTelemetry(logger::telemeterize);
-    }
+      drivetrain.registerTelemetry(logger::telemeterize);
+  }
 
      //Moves elevator to different positions, will be revised
   

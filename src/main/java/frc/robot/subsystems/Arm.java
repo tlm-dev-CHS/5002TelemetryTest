@@ -30,13 +30,10 @@ import frc.robot.Constants.OperatorConstants;
 
 public class Arm extends SubsystemBase {
     
-
     final SparkMax m_armRotator = new SparkMax(OperatorConstants.m_armRotator, MotorType.kBrushless);
-    
 
     SparkMaxConfig rotatorConfig = new SparkMaxConfig();
     
-
     final RelativeEncoder encoder = m_armRotator.getEncoder();
     final AbsoluteEncoder rotatorAbsoluteEncoder = m_armRotator.getAbsoluteEncoder();
 
@@ -44,18 +41,38 @@ public class Arm extends SubsystemBase {
     double goal = 0.0;
     double factor = 0.0;
 
+    public SendableChooser<String> idleMode = new SendableChooser<String>();
+
     public Arm(){
-        rotatorConfig
-            .idleMode(IdleMode.kBrake)
+
+        idleMode.setDefaultOption("Brake", "brake");
+        idleMode.addOption("Coast", "coast");
+
+        if(idleMode.getSelected() == "brake")
+        {
+            rotatorConfig
+                .idleMode(IdleMode.kBrake)
+                .inverted(true)
+
+            .encoder
+                .positionConversionFactor(OperatorConstants.m_armConversionFactor)
+                .velocityConversionFactor(OperatorConstants.m_armConversionFactor/60);
+        }
+        else{
+            rotatorConfig
+            .idleMode(IdleMode.kCoast)
             .inverted(true)
 
         .encoder
             .positionConversionFactor(OperatorConstants.m_armConversionFactor)
             .velocityConversionFactor(OperatorConstants.m_armConversionFactor/60);
+        }
         
         m_armRotator.configure(rotatorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         m_controller.setTolerance(1);
+
+        goal = 0.0;
     }
 
     public double getMeasurement(){

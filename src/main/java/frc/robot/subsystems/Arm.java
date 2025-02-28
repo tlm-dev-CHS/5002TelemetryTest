@@ -21,6 +21,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -40,7 +41,7 @@ public class Arm extends SubsystemBase {
     final AbsoluteEncoder rotatorAbsoluteEncoder = m_armRotator.getAbsoluteEncoder();
 
     PIDController m_controller = new PIDController(0.5, 0, 0);
-
+    double goal = 0.0;
     double factor = 0.0;
 
     public Arm(){
@@ -57,26 +58,16 @@ public class Arm extends SubsystemBase {
         m_controller.setTolerance(1);
     }
 
-    public Command moveToPosition(Double dposition){
-
-        return runOnce(()->{setPosition(dposition);});
-
-        /**return sequence(
-            runOnce(()->{m_controller.setSetpoint(position);}),
-            run(()->{runArm();}).until(atGoal())
-        );**/
-    }
-
     public double getMeasurement(){
         return encoder.getPosition();
     }
 
     public void setPosition(double position){
-        m_controller.setSetpoint(position);
+        m_controller.reset();
+        goal = position;
     }
-
-    public void runArm(){
-        m_armRotator.set(m_controller.calculate(getMeasurement(), m_controller.getSetpoint()));
+    public Command runArm(){
+        return run(()->{m_armRotator.set(m_controller.calculate(getMeasurement(), goal));});
     }
     
     public void runMotor(double d){
@@ -95,12 +86,22 @@ public class Arm extends SubsystemBase {
         encoder.setPosition(0);
     }
 
+    public void coastMode(){
+        rotatorConfig.idleMode(IdleMode.kCoast);
+        m_armRotator.configure(rotatorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    }
+
+    public void brakeMode(){
+        rotatorConfig.idleMode(IdleMode.kBrake);
+        m_armRotator.configure(rotatorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    }
 
     @Override
     public void periodic(){
         SmartDashboard.putNumber("Arm Position", getMeasurement());
-        SmartDashboard.putNumber("Arm Setpoint", m_controller.getSetpoint());
+        SmartDashboard.putData("Arm Pid", m_controller);
         SmartDashboard.putNumber("Arm Output", m_controller.calculate(getMeasurement()));
         SmartDashboard.putBoolean("Arm At Goal", m_controller.atSetpoint());
+
     }
 }

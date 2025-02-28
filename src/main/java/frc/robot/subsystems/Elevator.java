@@ -73,6 +73,7 @@ public class Elevator extends SubsystemBase{
         controller.reset();
 
         controller.setTolerance(0.75);
+        moveToPosition(1.0);
     }
 
     //moves the elevator to a position in inches
@@ -120,6 +121,7 @@ public class Elevator extends SubsystemBase{
     public BooleanSupplier atGoal(){
         return ()->(controller.atSetpoint());
     }
+
 
     @Override
     public void periodic(){

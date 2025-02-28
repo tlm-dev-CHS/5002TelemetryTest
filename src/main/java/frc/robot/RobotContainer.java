@@ -23,6 +23,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Intake;
 
 import static edu.wpi.first.wpilibj2.command.Commands.none;
 import static edu.wpi.first.wpilibj2.command.Commands.run;
@@ -49,6 +50,7 @@ public class RobotContainer {
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final Elevator elevator = new Elevator();
     public final Arm arm = new Arm();
+    public final Intake intake = new Intake();
 
     public SendableChooser<Boolean> mode = new SendableChooser<Boolean>();
     private final SendableChooser<Command> autoChooser;
@@ -85,33 +87,23 @@ public class RobotContainer {
             )
         );
 
-        
-
-        // Run SysId routines when holding back/start and X/Y.
-        // Note that each routine should be run exactly once in a single log.
-        joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-
-        // reset the field-centric heading on left bumper press
         joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        
         joystick.x().onTrue(ArmSide());
         joystick.rightTrigger().onTrue(calibrateArm());
         joystick.leftTrigger().onTrue(ArmSide());
 
         if(mode.getSelected() == true){
           System.out.println("CALIBRATING");
+          joystick.a().onTrue(calibrateElevator());
           }
         else{
-          joystick.a().onTrue(calibrateElevator());
-          joystick.y().onTrue(elevatorTop());
-    
+          
           joystick.povRight().onTrue(elevatorMid());
 
-          joystick.povDown().whileTrue(elevatorDown());
+          joystick.povDown().whileTrue(elevatorBottom());
     
-          joystick.povUp().whileTrue(elevatorUp());
+          joystick.povUp().whileTrue(elevatorTop());
 
           joystick.b().onTrue(stopElevator());
 
@@ -131,6 +123,7 @@ public class RobotContainer {
      //Moves elevator to different positions, will be revised
   
 
+  //ELEVATOR COMMANDS
   public Command elevatorTop(){
     return runOnce(()-> {elevator.moveToPosition(27.0);}, elevator);
   }
@@ -167,6 +160,7 @@ public class RobotContainer {
     );
   }
 
+  //ARM COMMANDS
   public Command calibrateArm(){
     return sequence(
       runOnce(() -> {arm.zero();}, arm)
@@ -176,8 +170,18 @@ public class RobotContainer {
   public Command ArmSide(){
     return run(()->{arm.moveToPosition(60.0);}, arm);
   }
+
   public Command stopArm(){
     return runOnce(()->{arm.stop();});
+  }
+
+  //INTAKE COMMANDS
+  public Command intake(){
+    return run(()->{intake.runIntake(6);}, intake).until(intake.gotCoral());
+  }
+
+  public Command shoot(){
+    return run(()->{intake.runIntake(-6);}, intake);
   }
 
   public Command getAutonomousCommand() {

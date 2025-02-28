@@ -31,10 +31,10 @@ public class Arm extends SubsystemBase {
     
 
     final SparkMax m_armRotator = new SparkMax(OperatorConstants.m_armRotator, MotorType.kBrushless);
-    final SparkMax m_armShooter = new SparkMax(OperatorConstants.m_armShooter, MotorType.kBrushless);
+    
 
     SparkMaxConfig rotatorConfig = new SparkMaxConfig();
-    SparkMaxConfig shooterConfig = new SparkMaxConfig();
+    
 
     final RelativeEncoder encoder = m_armRotator.getEncoder();
     final AbsoluteEncoder rotatorAbsoluteEncoder = m_armRotator.getAbsoluteEncoder();
@@ -51,13 +51,8 @@ public class Arm extends SubsystemBase {
         .encoder
             .positionConversionFactor(OperatorConstants.m_armConversionFactor)
             .velocityConversionFactor(OperatorConstants.m_armConversionFactor/60);
-
-        shooterConfig
-            .idleMode(IdleMode.kBrake);
-        
         
         m_armRotator.configure(rotatorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        m_armShooter.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         controller.setTolerance(1);
     }
@@ -79,14 +74,6 @@ public class Arm extends SubsystemBase {
     
     public void runMotor(double d){
         m_armRotator.set(d);
-    }
-
-    public void intake(){
-        m_armShooter.set(-.80);
-    }
-
-    public void outake(){
-        m_armShooter.set(0.8);
     }
 
     public BooleanSupplier atGoal(){

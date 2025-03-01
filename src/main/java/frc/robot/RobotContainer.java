@@ -209,13 +209,46 @@ public class RobotContainer {
     return run(()->{climber.runClimber(6.0);});
   }
 
-  //SEQUENCE COMMANDS
+  //BIG COMMANDS
+
+  public Command defaultState(){
+    return parallel
+    (
+        runOnce(()->{elevator.moveToPosition(1.0);}),
+        runOnce(()->{arm.setPosition(0.0);})
+    );
+  }
+
   public Command collectState(){
     return parallel
     (
         runOnce(()->{elevator.moveToPosition(1.0);}),
         runOnce(()->{arm.setPosition(1.0);})
     );
-    
   }
+
+  public Command topReefState(){
+    return parallel
+    (
+        runOnce(()->{elevator.moveToPosition(1.0);}),
+        runOnce(()->{arm.setPosition(1.0);})
+    );
+  }
+
+  public Command middleReefState(){
+    return parallel
+    (
+        runOnce(()->{elevator.moveToPosition(1.0);}),
+        runOnce(()->{arm.setPosition(1.0);})
+    );
+  }
+
+  public Command bottomReefState(){
+    return parallel
+    (
+        runOnce(()->{elevator.moveToPosition(1.0);}),
+        runOnce(()->{arm.setPosition(1.0);})
+    );
+  }
+
 }

@@ -41,14 +41,16 @@ public class Arm extends SubsystemBase {
     double goal = 0.0;
     double factor = 0.0;
 
-    public SendableChooser<String> idleMode = new SendableChooser<String>();
+    public SendableChooser<Boolean> brakeMode = new SendableChooser<Boolean>();
 
     public Arm(){
 
-        idleMode.setDefaultOption("Brake", "brake");
-        idleMode.addOption("Coast", "coast");
+        brakeMode.setDefaultOption("Brake", true);
+        brakeMode.addOption("Coast", false);
 
-        if(idleMode.getSelected() == "brake")
+        SmartDashboard.putData("Arm idle mode", brakeMode);
+
+        if(brakeMode.getSelected() == false)
         {
             rotatorConfig
                 .idleMode(IdleMode.kBrake)

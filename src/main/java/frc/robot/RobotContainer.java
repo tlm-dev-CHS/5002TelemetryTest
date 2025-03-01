@@ -21,11 +21,13 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Arm;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 
 import static edu.wpi.first.wpilibj2.command.Commands.none;
+import static edu.wpi.first.wpilibj2.command.Commands.parallel;
 import static edu.wpi.first.wpilibj2.command.Commands.run;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static edu.wpi.first.wpilibj2.command.Commands.sequence;
@@ -51,6 +53,7 @@ public class RobotContainer {
     public final Elevator elevator = new Elevator();
     public final Arm arm = new Arm();
     public final Intake intake = new Intake();
+    public final Climber climber = new Climber();
 
     public SendableChooser<Boolean> mode = new SendableChooser<Boolean>();
     private final SendableChooser<Command> autoChooser;
@@ -199,5 +202,20 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();
+  }
+
+  //Climber Commands
+  public Command climb(){
+    return run(()->{climber.runClimber(6.0);});
+  }
+
+  //SEQUENCE COMMANDS
+  public Command collectState(){
+    return parallel
+    (
+        runOnce(()->{elevator.moveToPosition(1.0);}),
+        runOnce(()->{arm.setPosition(1.0);})
+    );
+    
   }
 }

@@ -34,8 +34,12 @@ public class Climber extends SubsystemBase {
         m_climber.configure(climberConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
-    public void runClumber(double speed){
+    public void runClimber(double speed){
         m_climber.setVoltage(speed);
+    }
+
+    public void stop(){
+        m_climber.stopMotor();
     }
     
 }

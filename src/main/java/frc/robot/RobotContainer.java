@@ -11,6 +11,7 @@ import com.ctre.phoenix.sensors.PigeonIMU.CalibrationMode;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -43,12 +44,13 @@ public class RobotContainer {
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
-    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-    private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+    //private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+    //private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     private final CommandXboxController joystick = new CommandXboxController(0);
+    private final CommandXboxController coJoystick = new CommandXboxController(1);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final Elevator elevator = new Elevator();
@@ -58,26 +60,22 @@ public class RobotContainer {
     public final autoAlign autoAlign = new autoAlign(drivetrain, 1);
     public SendableChooser<Boolean> mode = new SendableChooser<Boolean>();
     private final SendableChooser<Command> autoChooser;
+
+    private SlewRateLimiter filter = new SlewRateLimiter(0.5);
    
 
     public RobotContainer() {
-
-      
-        if(mode.getSelected() == null){
-          System.out.println("NO MODE");
-        }
+      if(mode.getSelected() == null){
+        System.out.println("NO MODE");
+      }
         
       autoChooser = AutoBuilder.buildAutoChooser("Test Auto");
       SmartDashboard.putData("Auto Mode", autoChooser);
 
-      configureBindings();
-
-        
+      configureBindings();        
     }
 
     private void configureBindings() {
-
-
       if(mode.getSelected() == null){
         System.out.println("NO MODE");
       }
@@ -86,8 +84,8 @@ public class RobotContainer {
       drivetrain.setDefaultCommand(
           // Drivetrain will execute this command periodically
           drivetrain.applyRequest(() ->
-              drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                  .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+              drive.withVelocityX(filter.calculate(-joystick.getLeftY()) * MaxSpeed) // Drive forward with negative Y (forward)
+                  .withVelocityY(filter.calculate(-joystick.getLeftX()) * MaxSpeed) // Drive left with negative X (left)
                   .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
           )
       );
@@ -116,12 +114,6 @@ public class RobotContainer {
         joystick.b().onTrue(stopElevator());
 
         joystick.y().whileTrue(climb());
-
-        //joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-
-        
-        //joystick.leftTrigger().onTrue(intake());
-
         
         elevator.setDefaultCommand(elevator.runElevator());
         arm.setDefaultCommand(arm.runArm());
@@ -266,6 +258,5 @@ public class RobotContainer {
     ).until(armElevatorAtGoal());
   }
 
-    
   }
 

@@ -102,13 +102,14 @@ public class RobotContainer {
         joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         
         joystick.x().onTrue(ArmSide());
-        joystick.rightBumper().onTrue(calibrateArm());
+        
         joystick.rightTrigger().onTrue(ArmUp());
         joystick.leftTrigger().onTrue(ArmSide());
 
         if(mode.getSelected() == true){
           System.out.println("CALIBRATING");
           joystick.a().onTrue(calibrateElevator());
+          joystick.rightBumper().onTrue(calibrateArm());
           }
         else{
           
@@ -119,6 +120,8 @@ public class RobotContainer {
           joystick.povUp().whileTrue(elevatorTop());
 
           joystick.b().onTrue(stopElevator());
+
+          joystick.y().whileTrue(climb());
 
           //joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
 

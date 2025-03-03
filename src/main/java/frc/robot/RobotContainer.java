@@ -33,6 +33,8 @@ import static edu.wpi.first.wpilibj2.command.Commands.sequence;
 import static edu.wpi.first.wpilibj2.command.Commands.waitSeconds;
 import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
 
+import java.util.function.BooleanSupplier;
+
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
@@ -76,57 +78,57 @@ public class RobotContainer {
     private void configureBindings() {
 
 
-        if(mode.getSelected() == null){
-          System.out.println("NO MODE");
-        }
-        // Note that X is defined as forward according to WPILib convention,
-        // and Y is defined as to the left according to WPILib convention.
-        drivetrain.setDefaultCommand(
-            // Drivetrain will execute this command periodically
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
-            )
-        );
+      if(mode.getSelected() == null){
+        System.out.println("NO MODE");
+      }
+      // Note that X is defined as forward according to WPILib convention,
+      // and Y is defined as to the left according to WPILib convention.
+      drivetrain.setDefaultCommand(
+          // Drivetrain will execute this command periodically
+          drivetrain.applyRequest(() ->
+              drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                  .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                  .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+          )
+      );
 
-        joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-        
-        joystick.x().onTrue(ArmSide());
+      joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+      
+      joystick.x().onTrue(ArmSide());
+      joystick.rightBumper().onTrue(calibrateArm());
+      joystick.rightTrigger().onTrue(ArmUp());
+      joystick.leftTrigger().onTrue(ArmSide());
+      joystick.leftBumper().onTrue(autoAlign);
+
+      if(mode.getSelected() == true){
+        System.out.println("CALIBRATING");
+        joystick.a().onTrue(calibrateElevator());
         joystick.rightBumper().onTrue(calibrateArm());
-        joystick.rightTrigger().onTrue(ArmUp());
-        joystick.leftTrigger().onTrue(ArmSide());
-        joystick.leftBumper().onTrue(autoAlign);
+        }
+      else{
+        
+        joystick.povRight().onTrue(elevatorMid());
 
-        if(mode.getSelected() == true){
-          System.out.println("CALIBRATING");
-          joystick.a().onTrue(calibrateElevator());
-          joystick.rightBumper().onTrue(calibrateArm());
+        joystick.povDown().whileTrue(elevatorBottom());
+  
+        joystick.povUp().whileTrue(elevatorTop());
+
+        joystick.b().onTrue(stopElevator());
+
+        joystick.y().whileTrue(climb());
+
+        //joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+
+        
+        //joystick.leftTrigger().onTrue(intake());
+
+        
+        elevator.setDefaultCommand(elevator.runElevator());
+        arm.setDefaultCommand(arm.runArm());
+
           }
-        else{
-          
-          joystick.povRight().onTrue(elevatorMid());
 
-          joystick.povDown().whileTrue(elevatorBottom());
-    
-          joystick.povUp().whileTrue(elevatorTop());
-
-          joystick.b().onTrue(stopElevator());
-
-          joystick.y().whileTrue(climb());
-
-          //joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-
-          
-          //joystick.leftTrigger().onTrue(intake());
-
-          
-          elevator.setDefaultCommand(elevator.runElevator());
-          arm.setDefaultCommand(arm.runArm());
-
-            }
-
-        drivetrain.registerTelemetry(logger::telemeterize);
+      drivetrain.registerTelemetry(logger::telemeterize);
     }
 
      //Moves elevator to different positions, will be revised
@@ -136,7 +138,15 @@ public class RobotContainer {
     mode.addOption("Competition", false);
 
     SmartDashboard.putData("Mode", mode);
+  }
 
+  public BooleanSupplier armElevatorAtGoal(){
+    if(arm.atGoal().getAsBoolean() && elevator.atGoal().getAsBoolean()){
+      return ()->true;
+    }
+    else{
+      return ()->false;
+    }
   }
 
   //ELEVATOR COMMANDS
@@ -220,7 +230,7 @@ public class RobotContainer {
     (
         runOnce(()->{elevator.moveToPosition(1.0);}),
         runOnce(()->{arm.setPosition(0.0);})
-    );
+    ).until(armElevatorAtGoal());
   }
 
   public Command collectState(){
@@ -228,7 +238,7 @@ public class RobotContainer {
     (
         runOnce(()->{elevator.moveToPosition(1.0);}),
         runOnce(()->{arm.setPosition(1.0);})
-    );
+    ).until(armElevatorAtGoal());
 
   }
 
@@ -237,7 +247,7 @@ public class RobotContainer {
     (
         runOnce(()->{elevator.moveToPosition(1.0);}),
         runOnce(()->{arm.setPosition(1.0);})
-    );
+    ).until(armElevatorAtGoal());
   }
 
   public Command middleReefState(){
@@ -245,7 +255,7 @@ public class RobotContainer {
     (
         runOnce(()->{elevator.moveToPosition(1.0);}),
         runOnce(()->{arm.setPosition(1.0);})
-    );
+    ).until(armElevatorAtGoal());
   }
 
   public Command bottomReefState(){
@@ -253,7 +263,7 @@ public class RobotContainer {
     (
         runOnce(()->{elevator.moveToPosition(1.0);}),
         runOnce(()->{arm.setPosition(1.0);})
-    );
+    ).until(armElevatorAtGoal());
   }
 
     

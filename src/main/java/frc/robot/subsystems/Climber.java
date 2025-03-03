@@ -25,7 +25,6 @@ public class Climber extends SubsystemBase {
 
     SparkMaxConfig climberConfig = new SparkMaxConfig();
 
-
     public Climber(){
 
         climberConfig

@@ -18,7 +18,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Climber;
@@ -54,18 +53,14 @@ public class RobotContainer {
     public final Intake intake = new Intake();
     public final Arm arm = new Arm();
     public final Climber climber = new Climber();
-    public SendableChooser<Boolean> mode = new SendableChooser<>();
-    public SendableChooser<Boolean> calibrationMode = new SendableChooser<Boolean>();
+    public final autoAlign autoAlign = new autoAlign(drivetrain, 1);
+    public SendableChooser<Boolean> mode = new SendableChooser<Boolean>();
     private final SendableChooser<Command> autoChooser;
    
 
     public RobotContainer() {
 
-      mode.setDefaultOption("Calibrate", true);
-      mode.addOption("Competition", false);
-
-      SmartDashboard.putData("Mode", mode);
-
+      
         if(mode.getSelected() == null){
           System.out.println("NO MODE");
         }
@@ -79,13 +74,9 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        calibrationMode.setDefaultOption("Competition", false);
-        calibrationMode.addOption("Calibration", true);
 
-        SmartDashboard.putData("Auto Mode", autoChooser);
-        SmartDashboard.putData("Mode", calibrationMode);
 
-        if(calibrationMode.getSelected() == null){
+        if(mode.getSelected() == null){
           System.out.println("NO MODE");
         }
         // Note that X is defined as forward according to WPILib convention,
@@ -102,9 +93,10 @@ public class RobotContainer {
         joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         
         joystick.x().onTrue(ArmSide());
-        
+        joystick.rightBumper().onTrue(calibrateArm());
         joystick.rightTrigger().onTrue(ArmUp());
         joystick.leftTrigger().onTrue(ArmSide());
+        joystick.leftBumper().onTrue(autoAlign);
 
         if(mode.getSelected() == true){
           System.out.println("CALIBRATING");
@@ -139,6 +131,13 @@ public class RobotContainer {
 
      //Moves elevator to different positions, will be revised
   
+  public void buildChooser(){
+    mode.setDefaultOption("Calibrate", true);
+    mode.addOption("Competition", false);
+
+    SmartDashboard.putData("Mode", mode);
+
+  }
 
   //ELEVATOR COMMANDS
   public Command elevatorTop(){
@@ -192,9 +191,6 @@ public class RobotContainer {
     return runOnce(()->{arm.setPosition(120.0);},arm);
   }
 
-  //public Command setArmPoint(){
-    //return runOnce(()->{arm.m_controller.seSetpoint()}, null)''
-  //}
   public Command stopArm(){
     return runOnce(()->{arm.stop();});
   }

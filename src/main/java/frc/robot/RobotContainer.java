@@ -222,6 +222,10 @@ public class RobotContainer {
     return run(()->{climber.runClimber(6.0);}).finallyDo(()->climber.stop());
   }
 
+  public Command Unclimb(){
+    return run(()->{climber.runClimber(-6.0);}).finallyDo(()->climber.stop());
+  }
+
   //SEQUENCE COMMANDS
 
   public Command defaultState(){

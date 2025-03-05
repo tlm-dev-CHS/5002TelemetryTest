@@ -46,7 +46,7 @@ public final class Constants
 
     //AutoAIm:
     public static final String cameraName = "photonvision";
-    public static final double distanceToTag = 8 * 2.54;
+    public static final double distanceToTag = 16 * 2.54;
 
     //Arm Constants
     public final int beamBreakId = 0;

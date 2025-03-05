@@ -61,7 +61,7 @@ public class Elevator extends SubsystemBase{
             
         followerConfig
             .follow(m_elevator, true)
-            .idleMode(IdleMode.kBrake)
+            .idleMode(IdleMode.kCoast)
             .smartCurrentLimit(200)
         .encoder
             .positionConversionFactor(OperatorConstants.elvatorConversionFactor)

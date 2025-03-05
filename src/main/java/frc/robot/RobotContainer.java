@@ -54,7 +54,7 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public final Elevator elevator = new Elevator();
-    public final Intake intake = new Intake();
+    public final static Intake intake = new Intake();
     public final Arm arm = new Arm();
     public final Climber climber = new Climber();
     public final autoAlign autoAlign = new autoAlign(drivetrain, joystick,5);
@@ -66,8 +66,9 @@ public class RobotContainer {
 
     public RobotContainer() {
 
-      mode.addOption("Calibrate", true);
       mode.setDefaultOption("Competition", false);
+      mode.addOption("Calibrate", true);
+
       SmartDashboard.putData("Mode", mode);
 
       if(mode.getSelected() == null){
@@ -95,39 +96,59 @@ public class RobotContainer {
           )
       );
 
+      //UNIVERSAL BINDS
+
+      //Reset Field Orientation
       joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
       
-      joystick.x().onTrue(ArmSide());
-      
+      //Auto Allign to April Tag
       joystick.leftBumper().onTrue(autoAlign);
 
+      //Use Shooter
+      joystick.rightTrigger().whileTrue(shoot());
+      joystick.leftTrigger().whileTrue(intake());
+
+      //CALIBRATION MODE BINDS
       if(mode.getSelected() == true){
         System.out.println("CALIBRATING");
+        elevator.removeDefaultCommand();
+        arm.removeDefaultCommand();
+
+        //Zero Arm and Elevator
         joystick.a().onTrue(calibrateElevator());
         joystick.b().onTrue(calibrateArm());
 
+        //Force stop Arm and Elevator
+        joystick.x().onTrue(stopElevator());
+        joystick.y().onTrue(stopArm());
+
+        //Move Elevator
         joystick.povUp().whileTrue(elevatorUp());
         joystick.povDown().whileTrue(elevatorDown());
+
+        //Move Arm
         joystick.povLeft().whileTrue(armCounterClockwise());
         joystick.povRight().whileTrue(armClockwise());
         }
+      //COMPETITION MODE BINDS
       else{
-        
-        joystick.povRight().onTrue(elevatorMid());
+        System.out.println("COMPETITION");
 
-        joystick.povDown().whileTrue(elevatorBottom());
-  
-        joystick.povUp().whileTrue(elevatorTop());
+        //Default State
+        joystick.a().onTrue(defaultState());
 
-        joystick.b().onTrue(stopElevator());
+        //Collect State
+        joystick.b().onTrue(collectState());
 
+        //Score Coral
+        joystick.povLeft().onTrue(l1State());
+        joystick.povDown().onTrue(l2State());
+        joystick.povRight().onTrue(l3State());
+        joystick.povUp().onTrue(l4State());
+
+        //Use Climber
         joystick.y().whileTrue(climb());
-
         joystick.x().whileTrue(Unclimb());
-
-        joystick.rightTrigger().whileTrue(shoot());
-
-        joystick.leftTrigger().whileTrue(intake());
         
         elevator.setDefaultCommand(elevator.runElevator());
         arm.setDefaultCommand(arm.runArm());
@@ -246,7 +267,7 @@ public class RobotContainer {
 
   }
 
-  public Command topReefState(){
+  public Command l4State(){
     return parallel
     (
         runOnce(()->{elevator.moveToPosition(1.0);}),
@@ -254,7 +275,7 @@ public class RobotContainer {
     ).until(armElevatorAtGoal());
   }
 
-  public Command middleReefState(){
+  public Command l3State(){
     return parallel
     (
         runOnce(()->{elevator.moveToPosition(1.0);}),
@@ -262,7 +283,15 @@ public class RobotContainer {
     ).until(armElevatorAtGoal());
   }
 
-  public Command bottomReefState(){
+  public Command l2State(){
+    return parallel
+    (
+        runOnce(()->{elevator.moveToPosition(1.0);}),
+        runOnce(()->{arm.setPosition(1.0);})
+    ).until(armElevatorAtGoal());
+  }
+
+  public Command l1State(){
     return parallel
     (
         runOnce(()->{elevator.moveToPosition(1.0);}),

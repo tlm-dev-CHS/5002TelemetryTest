@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.OperatorConstants;
 
 public class Arm extends SubsystemBase {
@@ -37,11 +38,13 @@ public class Arm extends SubsystemBase {
     final RelativeEncoder encoder = m_armRotator.getEncoder();
     final AbsoluteEncoder rotatorAbsoluteEncoder = m_armRotator.getAbsoluteEncoder();
 
-    PIDController m_controller = new PIDController(0.5, 0, 0);
+    PIDController m_controller = new PIDController(0.25, 0, 0);
     double goal = 0.0;
     double factor = 0.0;
 
     public SendableChooser<Boolean> brakeMode = new SendableChooser<Boolean>();
+
+    private Intake intake = RobotContainer.intake;
 
     public Arm(){
 
@@ -88,7 +91,14 @@ public class Arm extends SubsystemBase {
         goal = position;
     }
     public Command runArm(){
-        return run(()->{m_armRotator.set(m_controller.calculate(getMeasurement(), goal));});
+        return run(()->{
+            m_armRotator.set(m_controller.calculate(getMeasurement(), goal));
+            if(encoder.getVelocity() > 10){
+                intake.runIntake(1);
+            }
+            else{
+                intake.runIntake(0);
+            }});
     }
     
     public void runMotor(double d){

@@ -19,7 +19,11 @@ public class Robot extends TimedRobot {
 
   public Robot() {
     m_robotContainer = new RobotContainer();
-    
+  }
+
+  @Override
+  public void robotInit(){
+    m_robotContainer.configureBindings();   
   }
 
   @Override
@@ -57,7 +61,7 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
 
-    m_robotContainer.buildChooser();
+    
   }
 
   @Override

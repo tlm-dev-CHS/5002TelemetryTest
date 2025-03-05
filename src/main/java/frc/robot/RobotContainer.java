@@ -77,10 +77,10 @@ public class RobotContainer {
       autoChooser = AutoBuilder.buildAutoChooser("Test Auto");
       SmartDashboard.putData("Auto Mode", autoChooser);
 
-      configureBindings();        
+           
     }
 
-    private void configureBindings() {
+    public void configureBindings() {
       if(mode.getSelected() == null){
         System.out.println("NO MODE");
       }
@@ -98,15 +98,18 @@ public class RobotContainer {
       joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
       
       joystick.x().onTrue(ArmSide());
-      joystick.rightBumper().onTrue(calibrateArm());
       
-      //joystick.leftTrigger().onTrue(ArmSide());
       joystick.leftBumper().onTrue(autoAlign);
 
       if(mode.getSelected() == true){
         System.out.println("CALIBRATING");
         joystick.a().onTrue(calibrateElevator());
-        joystick.rightBumper().onTrue(calibrateArm());
+        joystick.b().onTrue(calibrateArm());
+
+        joystick.povUp().whileTrue(elevatorUp());
+        joystick.povDown().whileTrue(elevatorDown());
+        joystick.povLeft().whileTrue(armCounterClockwise());
+        joystick.povRight().whileTrue(armClockwise());
         }
       else{
         
@@ -119,6 +122,8 @@ public class RobotContainer {
         joystick.b().onTrue(stopElevator());
 
         joystick.y().whileTrue(climb());
+
+        joystick.x().whileTrue(Unclimb());
 
         joystick.rightTrigger().whileTrue(shoot());
 
@@ -134,11 +139,6 @@ public class RobotContainer {
 
      //Moves elevator to different positions, will be revised
   
-  public void buildChooser(){
-    
-    
-  }
-
   public BooleanSupplier armElevatorAtGoal(){
     if(arm.atGoal().getAsBoolean() && elevator.atGoal().getAsBoolean()){
       return ()->true;
@@ -162,11 +162,11 @@ public class RobotContainer {
   }
 
   public Command elevatorUp(){
-    return run(()-> {elevator.setMotor(0.3);}, elevator);
+    return run(()-> {elevator.setMotor(0.3);}, elevator).finallyDo(()->elevator.stopMotor());
   }
 
   public Command elevatorDown(){
-    return run(()-> {elevator.setMotor(-0.3);}, elevator);
+    return run(()-> {elevator.setMotor(-0.3);}, elevator).finallyDo(()->elevator.stopMotor());
   }
 
   public Command stopElevator(){
@@ -175,14 +175,7 @@ public class RobotContainer {
 
   //Calibrates the Elevator conversion factor from the bottom. MAKE SURE IT STARTS AT THE BOTTOM
   public Command calibrateElevator(){
-    return sequence(
-      runOnce(() -> {elevator.zeroEncoder();}, elevator),
-      run(() -> {elevator.setMotor(0.35);}, elevator).until
-      (elevator.atTop()),
-      runOnce(()->{System.out.println(elevator.getAmps());}),
-      runOnce(() -> {elevator.stopMotor();}, elevator),
-      runOnce(() -> {elevator.calibrate();}, elevator)
-    );
+    return runOnce(()->elevator.zeroEncoder());
   }
 
   //ARM COMMANDS
@@ -198,6 +191,14 @@ public class RobotContainer {
 
   public Command ArmUp(){
     return runOnce(()->{arm.setPosition(120.0);},arm);
+  }
+
+  public Command armCounterClockwise(){
+    return run(()->arm.runMotor(4.0)).finallyDo(()->arm.stop());
+  }
+
+  public Command armClockwise(){
+    return run(()->arm.runMotor(-4.0)).finallyDo(()->arm.stop());
   }
 
   public Command stopArm(){

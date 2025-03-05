@@ -72,6 +72,8 @@ public class Arm extends SubsystemBase {
         
         m_armRotator.configure(rotatorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
+        m_controller.reset();
+
         m_controller.setTolerance(1);
 
         goal = 0.0;

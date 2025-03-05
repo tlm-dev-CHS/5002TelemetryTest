@@ -1,5 +1,7 @@
 package frc.robot;
 
+import java.math.RoundingMode;
+
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 
@@ -8,13 +10,15 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.RobotContainer;
 
 public class autoAlign extends Command {
     private final PhotonCamera camera;
     private final CommandSwerveDrivetrain swerveDrive;
-    private final SwerveRequest.FieldCentric requester;
+    private final SwerveRequest.RobotCentric requester;
 
     private final PIDController rotationController;
     private final PIDController xPidController;
@@ -22,31 +26,34 @@ public class autoAlign extends Command {
 
     private final int targetID;
     private final Timer lostTargetTimer = new Timer();
-
-    private static final double LOST_TARGET_TIMEOUT = 0.5; 
-
-    public autoAlign(CommandSwerveDrivetrain swerveDrive, int targetID) {
+        private CommandXboxController controller;
+    
+        private static final double LOST_TARGET_TIMEOUT = 0.5; 
+    
+        public autoAlign(CommandSwerveDrivetrain swerveDrive, CommandXboxController controller, int targetID) {
+            this.controller = controller;
         this.swerveDrive = swerveDrive;
         this.targetID = targetID;
         addRequirements(swerveDrive);
 
         camera = new PhotonCamera(OperatorConstants.cameraName);
-        requester = new SwerveRequest.FieldCentric();
+        requester = new SwerveRequest.RobotCentric();
 
         // PID Controllers with Tolerance
-        rotationController = new PIDController(0.5, 0.0, 0.0);
-        xPidController = new PIDController(0.5, 0.0, 0.0);
-        yPidController = new PIDController(0.5, 0.0, 0.0);
+        rotationController = new PIDController(1, 0.0, 0.0);
+        xPidController = new PIDController(0.1, 0.0, 0.0);
+        yPidController = new PIDController(0.1, 0.0, 0.0);
 
         rotationController.setTolerance(0.05); 
         xPidController.setTolerance(0.02);     
         yPidController.setTolerance(0.02);    
+
     }
 
     @Override
     public void initialize() {
-        lostTargetTimer.reset();
-        lostTargetTimer.start();
+        //lostTargetTimer.reset();
+        //lostTargetTimer.start();
     }
 
     @Override
@@ -60,7 +67,7 @@ public class autoAlign extends Command {
                 Transform3d bestCameraToTarget = target.getBestCameraToTarget();
                 double distance = OperatorConstants.distanceToTag;  
 
-                double rError = bestCameraToTarget.getRotation().getZ();
+                double rError = target.getYaw();
                 double yError = bestCameraToTarget.getY();
                 double xError = bestCameraToTarget.getX() - distance;
 
@@ -68,15 +75,17 @@ public class autoAlign extends Command {
                 double yOutput = yPidController.calculate(yError, 0);
                 double rOutput = rotationController.calculate(rError, 0);
 
+                System.out.println("rError:" + rError + "||" + "yError:" + yError + "||" +"xError:" + xError);
+
                 swerveDrive.setControl(requester.withVelocityX(xOutput)
                                                 .withVelocityY(yOutput)
                                                 .withRotationalRate(rOutput));
 
-                lostTargetTimer.reset(); 
+                //lostTargetTimer.reset(); 
             }
         }
 
-        if (!hasTargets && lostTargetTimer.hasElapsed(LOST_TARGET_TIMEOUT)) {
+        if (!hasTargets || controller.rightTrigger().getAsBoolean()) {
             end(true);
         }
     }
@@ -90,7 +99,7 @@ public class autoAlign extends Command {
                 Transform3d bestCameraToTarget = target.getBestCameraToTarget();
                 double xError = bestCameraToTarget.getX() - OperatorConstants.distanceToTag;
                 double yError = bestCameraToTarget.getY();
-                double rError = bestCameraToTarget.getRotation().getZ();
+                double rError = target.getYaw();
 
                 return xPidController.atSetpoint() &&
                        yPidController.atSetpoint() &&

@@ -40,7 +40,7 @@ public class Intake extends SubsystemBase {
     }
 
     public BooleanSupplier gotCoral(){
-        return ()->getAmps() >= 25;
+        return ()->getAmps() >= 80;
     }
 
     @Override

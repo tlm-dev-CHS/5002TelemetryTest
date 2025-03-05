@@ -49,7 +49,7 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    private final CommandXboxController joystick = new CommandXboxController(0);
+    public CommandXboxController joystick = new CommandXboxController(0);
     private final CommandXboxController coJoystick = new CommandXboxController(1);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
@@ -57,14 +57,19 @@ public class RobotContainer {
     public final Intake intake = new Intake();
     public final Arm arm = new Arm();
     public final Climber climber = new Climber();
-    public final autoAlign autoAlign = new autoAlign(drivetrain, 1);
+    public final autoAlign autoAlign = new autoAlign(drivetrain, joystick,5);
     public SendableChooser<Boolean> mode = new SendableChooser<Boolean>();
     private final SendableChooser<Command> autoChooser;
 
-    private SlewRateLimiter filter = new SlewRateLimiter(0.5);
+    private SlewRateLimiter filter = new SlewRateLimiter(0.75);
    
 
     public RobotContainer() {
+
+      mode.addOption("Calibrate", true);
+      mode.setDefaultOption("Competition", false);
+      SmartDashboard.putData("Mode", mode);
+
       if(mode.getSelected() == null){
         System.out.println("NO MODE");
       }
@@ -84,8 +89,8 @@ public class RobotContainer {
       drivetrain.setDefaultCommand(
           // Drivetrain will execute this command periodically
           drivetrain.applyRequest(() ->
-              drive.withVelocityX(filter.calculate(-joystick.getLeftY()) * MaxSpeed) // Drive forward with negative Y (forward)
-                  .withVelocityY(filter.calculate(-joystick.getLeftX()) * MaxSpeed) // Drive left with negative X (left)
+              drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                  .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
                   .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
           )
       );
@@ -94,8 +99,8 @@ public class RobotContainer {
       
       joystick.x().onTrue(ArmSide());
       joystick.rightBumper().onTrue(calibrateArm());
-      joystick.rightTrigger().onTrue(ArmUp());
-      joystick.leftTrigger().onTrue(ArmSide());
+      
+      //joystick.leftTrigger().onTrue(ArmSide());
       joystick.leftBumper().onTrue(autoAlign);
 
       if(mode.getSelected() == true){
@@ -114,6 +119,10 @@ public class RobotContainer {
         joystick.b().onTrue(stopElevator());
 
         joystick.y().whileTrue(climb());
+
+        joystick.rightTrigger().whileTrue(shoot());
+
+        joystick.leftTrigger().whileTrue(intake());
         
         elevator.setDefaultCommand(elevator.runElevator());
         arm.setDefaultCommand(arm.runArm());
@@ -126,10 +135,8 @@ public class RobotContainer {
      //Moves elevator to different positions, will be revised
   
   public void buildChooser(){
-    mode.setDefaultOption("Calibrate", true);
-    mode.addOption("Competition", false);
-
-    SmartDashboard.putData("Mode", mode);
+    
+    
   }
 
   public BooleanSupplier armElevatorAtGoal(){
@@ -143,7 +150,7 @@ public class RobotContainer {
 
   //ELEVATOR COMMANDS
   public Command elevatorTop(){
-    return runOnce(()-> {elevator.moveToPosition(27.0);}, elevator);
+    return runOnce(()-> {elevator.moveToPosition(20.0);}, elevator);
   }
 
   public Command elevatorMid(){
@@ -199,11 +206,11 @@ public class RobotContainer {
 
   //INTAKE COMMANDS
   public Command intake(){
-    return run(()->{intake.runIntake(6);}, intake).until(intake.gotCoral());
+    return run(()->{intake.runIntake(-8);}, intake).until(intake.gotCoral()).finallyDo(()->intake.stopIntake());
   }
 
   public Command shoot(){
-    return run(()->{intake.runIntake(-6);}, intake);
+    return run(()->{intake.runIntake(8);}, intake).finallyDo(()->intake.stopIntake());
   }
 
   public Command getAutonomousCommand() {
@@ -212,7 +219,7 @@ public class RobotContainer {
 
   //Climber Commands
   public Command climb(){
-    return run(()->{climber.runClimber(6.0);});
+    return run(()->{climber.runClimber(6.0);}).finallyDo(()->climber.stop());
   }
 
   //SEQUENCE COMMANDS

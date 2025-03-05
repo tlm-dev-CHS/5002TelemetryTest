@@ -54,7 +54,7 @@ public class Elevator extends SubsystemBase{
         
         mainConfig
             .idleMode(IdleMode.kBrake)
-            .smartCurrentLimit(200)
+            .smartCurrentLimit(80)
         .encoder
             .positionConversionFactor(OperatorConstants.elvatorConversionFactor)
             .velocityConversionFactor(OperatorConstants.elvatorConversionFactor/60);

@@ -112,7 +112,7 @@ public class RobotContainer {
       if(mode.getSelected() == true){
         System.out.println("CALIBRATING");
         elevator.setDefaultCommand(elevator.maintanElevator());
-        arm.setDefaultCommand(run(()->arm.runMotor(0)));
+        arm.setDefaultCommand(run(()->{arm.runMotor(0);}, arm));
 
         //Zero Arm and Elevator
         joystick.a().onTrue(calibrateElevator());
@@ -145,8 +145,7 @@ public class RobotContainer {
         joystick.povRight().onTrue(l3State());
         joystick.povUp().onTrue(l4State());
 
-        
-        
+      
         elevator.setDefaultCommand(elevator.runElevator());
         arm.setDefaultCommand(arm.runArm());
 

@@ -72,7 +72,7 @@ public class Elevator extends SubsystemBase{
 
         controller.reset();
 
-        controller.setTolerance(0.75);
+        controller.setTolerance(0.25);
         moveToPosition(1.0);
     }
 

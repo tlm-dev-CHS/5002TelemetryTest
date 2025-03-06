@@ -31,7 +31,7 @@ public class autoAlign extends Command {
         private static final double LOST_TARGET_TIMEOUT = 0.5; 
     
         public autoAlign(CommandSwerveDrivetrain swerveDrive, CommandXboxController controller, int targetID) {
-            this.controller = controller;
+        this.controller = controller;
         this.swerveDrive = swerveDrive;
         this.targetID = targetID;
         addRequirements(swerveDrive);

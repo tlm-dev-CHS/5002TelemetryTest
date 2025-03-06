@@ -142,10 +142,14 @@ public class RobotContainer {
         //Collect State
         joystick.b().onTrue(collectState());
 
+        joystick.y().whileTrue(climb());
+        joystick.x().whileTrue(Unclimb());
+
         //Score Coral
         joystick.povDown().onTrue(l2State());
         joystick.povRight().onTrue(l3State());
         joystick.povUp().onTrue(l4State());
+        joystick.povLeft().onTrue(ClimbState());
 
       
         elevator.setDefaultCommand(elevator.runElevator());
@@ -155,7 +159,6 @@ public class RobotContainer {
 
       drivetrain.registerTelemetry(logger::telemeterize);
 
-      arm.goal = 0.0;
     }
 
      //Moves elevator to different positions, will be revised
@@ -235,10 +238,6 @@ public class RobotContainer {
     return run(()->{intake.runIntake(8);}, intake).finallyDo(()->intake.stopIntake());
   }
 
-  public Command getAutonomousCommand() {
-    return autoChooser.getSelected();
-  }
-
   //Climber Commands
   public Command climb(){
     return run(()->{climber.runClimber(6.0);}).finallyDo(()->climber.stop());
@@ -250,45 +249,69 @@ public class RobotContainer {
 
   //SEQUENCE COMMANDS
   public Command defaultState(){
-    return parallel
+    return sequence
     (
-        runOnce(()->{elevator.moveToPosition(1.0);}),
-        runOnce(()->{arm.setPosition(0.0);})
+        runOnce(()->{arm.setPosition(0.0);}),
+        waitUntil(()->Math.abs(elevator.getMeasurement()) < -30),
+        runOnce(()->{elevator.moveToPosition(1.0);})
+        
     ).until(armElevatorAtGoal());
   }
 
   public Command collectState(){
-    return parallel
+    return sequence
     (
         runOnce(()->{elevator.moveToPosition(20.0);}),
-        runOnce(()->{arm.setPosition(135.5);})
+        waitUntil(()->elevator.getMeasurement() > 10),
+        runOnce(()->{arm.setPosition(156);})
     ).until(armElevatorAtGoal());
 
   }
 
   public Command l4State(){
-    return parallel
+    return sequence
     (
-        runOnce(()->{elevator.moveToPosition(26.5);}),
-        runOnce(()->{arm.setPosition(-43.25);})
+        runOnce(()->{elevator.moveToPosition(27.0);}),
+        waitUntil(()->elevator.getMeasurement() > 25.0),
+        runOnce(()->{arm.setPosition(-40);})
     ).until(armElevatorAtGoal());
   }
 
   public Command l3State(){
-    return parallel
+    return sequence
     (
-        runOnce(()->{elevator.moveToPosition(11.35);}),
-        runOnce(()->{arm.setPosition(-20);})
+        runOnce(()->{elevator.moveToPosition(15.25);}),
+        waitUntil(()->elevator.getMeasurement() > 12.0),
+        runOnce(()->{arm.setPosition(-36);})
     ).until(armElevatorAtGoal());
   }
 
   public Command l2State(){
-    return parallel
+    return sequence
     (
-        runOnce(()->{elevator.moveToPosition(4.2);}),
-        runOnce(()->{arm.setPosition(-20);})
+        runOnce(()->{elevator.moveToPosition(7.31);}),
+        waitUntil(()->elevator.getMeasurement() > 5.0),
+        runOnce(()->{arm.setPosition(-36);})
     ).until(armElevatorAtGoal());
   }
+
+  public Command ClimbState(){
+    return sequence
+    (
+        runOnce(()->{arm.setPosition(-60);}),
+        waitUntil(()->elevator.getMeasurement() < -30),
+        runOnce(()->{elevator.moveToPosition(0.5);})
+ 
+        
+    ).until(armElevatorAtGoal());
+  }
+
+
+  
+  public Command getAutonomousCommand() {
+    return autoChooser.getSelected();
+  }
+
 
   }
 

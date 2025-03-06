@@ -67,6 +67,7 @@ public class Arm extends SubsystemBase {
         m_controller.reset();
 
         m_controller.setTolerance(1);
+        setPosition(0.0);
     }
 
     public double getMeasurement(){

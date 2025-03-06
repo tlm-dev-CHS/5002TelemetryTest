@@ -27,6 +27,12 @@
                 }
               },
               {
+                "type": "wait",
+                "data": {
+                  "waitTime": 3.0
+                }
+              },
+              {
                 "type": "named",
                 "data": {
                   "name": "defaultState"
@@ -55,6 +61,12 @@
                 "type": "named",
                 "data": {
                   "name": "intake"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 2.0
                 }
               },
               {
@@ -89,28 +101,9 @@
                 }
               },
               {
-                "type": "named",
+                "type": "wait",
                 "data": {
-                  "name": "defaultState"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "sequential",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "elevatorTop"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "shoot"
+                  "waitTime": 1.0
                 }
               },
               {
@@ -126,62 +119,6 @@
           "type": "path",
           "data": {
             "pathName": "MiddleA4"
-          }
-        },
-        {
-          "type": "sequential",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "collectState"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "intake"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "defaultState"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "MiddleA5"
-          }
-        },
-        {
-          "type": "sequential",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "elevatorTop"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "shoot"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "defaultState"
-                }
-              }
-            ]
           }
         }
       ]

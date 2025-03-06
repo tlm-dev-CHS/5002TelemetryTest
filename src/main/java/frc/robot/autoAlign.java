@@ -34,7 +34,7 @@ public class autoAlign extends Command {
             this.controller = controller;
         this.swerveDrive = swerveDrive;
         this.targetID = targetID;
-        //addRequirements(swerveDrive);
+        addRequirements(swerveDrive);
 
         camera = new PhotonCamera(OperatorConstants.cameraName);
         requester = new SwerveRequest.RobotCentric();

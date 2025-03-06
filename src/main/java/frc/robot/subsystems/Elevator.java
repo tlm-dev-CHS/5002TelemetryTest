@@ -62,7 +62,7 @@ public class Elevator extends SubsystemBase{
         followerConfig
             .follow(m_elevator, true)
             .idleMode(IdleMode.kCoast)
-            .smartCurrentLimit(200)
+            .smartCurrentLimit(80)
         .encoder
             .positionConversionFactor(OperatorConstants.elvatorConversionFactor)
             .velocityConversionFactor(OperatorConstants.elvatorConversionFactor/60);
@@ -85,7 +85,12 @@ public class Elevator extends SubsystemBase{
     public Command runElevator(){
         return run(()->{
             double desiredSpeed = controller.calculate(getMeasurement(), goal);
-            //desiredSpeed = desiredSpeed + feedforward.calculate(1, 1);
+            m_elevator.setVoltage(desiredSpeed);});
+    }
+
+    public Command maintanElevator(){
+        return run(()->{
+            double desiredSpeed = feedforward.calculate(1, 1);
             m_elevator.setVoltage(desiredSpeed);});
     }
 

@@ -39,12 +39,13 @@ public class Arm extends SubsystemBase {
     final AbsoluteEncoder rotatorAbsoluteEncoder = m_armRotator.getAbsoluteEncoder();
 
     PIDController m_controller = new PIDController(0.25, 0, 0);
-    double goal = 0.0;
+    public double goal = 0.0;
     double factor = 0.0;
 
     public SendableChooser<Boolean> brakeMode = new SendableChooser<Boolean>();
 
     private Intake intake = RobotContainer.intake;
+    private Elevator elevator = RobotContainer.elevator;
 
     public Arm(){
 
@@ -53,33 +54,19 @@ public class Arm extends SubsystemBase {
 
         SmartDashboard.putData("Arm idle mode", brakeMode);
 
-        if(brakeMode.getSelected() == false)
-        {
-            rotatorConfig
-                .idleMode(IdleMode.kBrake)
-                .inverted(true)
-
-            .encoder
-                .positionConversionFactor(OperatorConstants.m_armConversionFactor)
-                .velocityConversionFactor(OperatorConstants.m_armConversionFactor/60);
-        }
-        else{
-            rotatorConfig
-            .idleMode(IdleMode.kCoast)
+        rotatorConfig
+            .idleMode(IdleMode.kBrake)
             .inverted(true)
 
         .encoder
             .positionConversionFactor(OperatorConstants.m_armConversionFactor)
             .velocityConversionFactor(OperatorConstants.m_armConversionFactor/60);
-        }
-        
+    
         m_armRotator.configure(rotatorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         m_controller.reset();
 
         m_controller.setTolerance(1);
-
-        goal = 0.0;
     }
 
     public double getMeasurement(){
@@ -92,13 +79,17 @@ public class Arm extends SubsystemBase {
     }
     public Command runArm(){
         return run(()->{
-            m_armRotator.set(m_controller.calculate(getMeasurement(), goal));
-            if(encoder.getVelocity() > 10){
+            if((elevator.getMeasurement() < 10 && Math.abs(goal) < 90) || (elevator.getMeasurement() >= 10)){
+                m_armRotator.set(m_controller.calculate(getMeasurement(), goal));
+            }
+
+            /*if(encoder.getVelocity() > 10){
                 intake.runIntake(1);
             }
             else{
                 intake.runIntake(0);
-            }});
+            }*/
+        });
     }
     
     public void runMotor(double d){
@@ -133,6 +124,5 @@ public class Arm extends SubsystemBase {
         SmartDashboard.putData("Arm Pid", m_controller);
         SmartDashboard.putNumber("Arm Output", m_controller.calculate(getMeasurement()));
         SmartDashboard.putBoolean("Arm At Goal", m_controller.atSetpoint());
-
     }
 }

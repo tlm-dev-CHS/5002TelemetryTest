@@ -53,11 +53,11 @@ public class RobotContainer {
     private final CommandXboxController coJoystick = new CommandXboxController(1);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    public final Elevator elevator = new Elevator();
+    public final static Elevator elevator = new Elevator();
     public final static Intake intake = new Intake();
     public final Arm arm = new Arm();
     public final Climber climber = new Climber();
-    public final autoAlign autoAlign = new autoAlign(drivetrain, joystick,5);
+    public final autoAlign autoAlign = new autoAlign(drivetrain, joystick,2);
     public SendableChooser<Boolean> mode = new SendableChooser<Boolean>();
     private final SendableChooser<Command> autoChooser;
 
@@ -111,16 +111,16 @@ public class RobotContainer {
       //CALIBRATION MODE BINDS
       if(mode.getSelected() == true){
         System.out.println("CALIBRATING");
-        elevator.removeDefaultCommand();
-        arm.removeDefaultCommand();
+        elevator.setDefaultCommand(elevator.maintanElevator());
+        arm.setDefaultCommand(run(()->arm.runMotor(0)));
 
         //Zero Arm and Elevator
         joystick.a().onTrue(calibrateElevator());
         joystick.b().onTrue(calibrateArm());
 
-        //Force stop Arm and Elevator
-        joystick.x().onTrue(stopElevator());
-        joystick.y().onTrue(stopArm());
+        //Use Climber
+        joystick.y().whileTrue(climb());
+        joystick.x().whileTrue(Unclimb());
 
         //Move Elevator
         joystick.povUp().whileTrue(elevatorUp());
@@ -141,14 +141,11 @@ public class RobotContainer {
         joystick.b().onTrue(collectState());
 
         //Score Coral
-        joystick.povLeft().onTrue(l1State());
         joystick.povDown().onTrue(l2State());
         joystick.povRight().onTrue(l3State());
         joystick.povUp().onTrue(l4State());
 
-        //Use Climber
-        joystick.y().whileTrue(climb());
-        joystick.x().whileTrue(Unclimb());
+        
         
         elevator.setDefaultCommand(elevator.runElevator());
         arm.setDefaultCommand(arm.runArm());
@@ -156,6 +153,8 @@ public class RobotContainer {
           }
 
       drivetrain.registerTelemetry(logger::telemeterize);
+
+      arm.goal = 0.0;
     }
 
      //Moves elevator to different positions, will be revised
@@ -215,11 +214,11 @@ public class RobotContainer {
   }
 
   public Command armCounterClockwise(){
-    return run(()->arm.runMotor(4.0)).finallyDo(()->arm.stop());
+    return run(()->arm.runMotor(2.0)).finallyDo(()->arm.stop());
   }
 
   public Command armClockwise(){
-    return run(()->arm.runMotor(-4.0)).finallyDo(()->arm.stop());
+    return run(()->arm.runMotor(-2.0)).finallyDo(()->arm.stop());
   }
 
   public Command stopArm(){
@@ -228,7 +227,7 @@ public class RobotContainer {
 
   //INTAKE COMMANDS
   public Command intake(){
-    return run(()->{intake.runIntake(-8);}, intake).until(intake.gotCoral()).finallyDo(()->intake.stopIntake());
+    return run(()->{intake.runIntake(-8);}).finallyDo(()->intake.stopIntake());
   }
 
   public Command shoot(){
@@ -261,8 +260,8 @@ public class RobotContainer {
   public Command collectState(){
     return parallel
     (
-        runOnce(()->{elevator.moveToPosition(1.0);}),
-        runOnce(()->{arm.setPosition(1.0);})
+        runOnce(()->{elevator.moveToPosition(20.0);}),
+        runOnce(()->{arm.setPosition(135.5);})
     ).until(armElevatorAtGoal());
 
   }
@@ -270,32 +269,24 @@ public class RobotContainer {
   public Command l4State(){
     return parallel
     (
-        runOnce(()->{elevator.moveToPosition(1.0);}),
-        runOnce(()->{arm.setPosition(1.0);})
+        runOnce(()->{elevator.moveToPosition(26.5);}),
+        runOnce(()->{arm.setPosition(-43.25);})
     ).until(armElevatorAtGoal());
   }
 
   public Command l3State(){
     return parallel
     (
-        runOnce(()->{elevator.moveToPosition(1.0);}),
-        runOnce(()->{arm.setPosition(1.0);})
+        runOnce(()->{elevator.moveToPosition(11.35);}),
+        runOnce(()->{arm.setPosition(-20);})
     ).until(armElevatorAtGoal());
   }
 
   public Command l2State(){
     return parallel
     (
-        runOnce(()->{elevator.moveToPosition(1.0);}),
-        runOnce(()->{arm.setPosition(1.0);})
-    ).until(armElevatorAtGoal());
-  }
-
-  public Command l1State(){
-    return parallel
-    (
-        runOnce(()->{elevator.moveToPosition(1.0);}),
-        runOnce(()->{arm.setPosition(1.0);})
+        runOnce(()->{elevator.moveToPosition(4.2);}),
+        runOnce(()->{arm.setPosition(-20);})
     ).until(armElevatorAtGoal());
   }
 

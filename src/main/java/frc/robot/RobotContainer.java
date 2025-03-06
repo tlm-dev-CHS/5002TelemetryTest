@@ -78,7 +78,9 @@ public class RobotContainer {
       autoChooser = AutoBuilder.buildAutoChooser("Test Auto");
       SmartDashboard.putData("Auto Mode", autoChooser);
 
-           
+
+
+        
     }
 
     public void configureBindings() {
@@ -247,7 +249,6 @@ public class RobotContainer {
   }
 
   //SEQUENCE COMMANDS
-
   public Command defaultState(){
     return parallel
     (

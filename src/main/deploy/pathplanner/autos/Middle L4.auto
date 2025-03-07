@@ -7,25 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "MiddleA1"
+            "pathName": "Middle Path"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "l3"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "shoot"
+            "name": "l4"
           }
         }
       ]

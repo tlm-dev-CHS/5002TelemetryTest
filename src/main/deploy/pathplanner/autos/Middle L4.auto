@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Example Path"
+            "pathName": "Middle Path"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "l3"
+            "name": "l4"
           }
         }
       ]

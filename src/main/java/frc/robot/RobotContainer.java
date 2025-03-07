@@ -10,6 +10,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix.sensors.PigeonIMU.CalibrationMode;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -78,8 +79,15 @@ public class RobotContainer {
       autoChooser = AutoBuilder.buildAutoChooser("Test Auto");
       SmartDashboard.putData("Auto Mode", autoChooser);
 
-
-
+      //REGISTER AUTO COMMANDS
+      NamedCommands.registerCommand("intake", intake());
+      NamedCommands.registerCommand("shoot", shoot());
+      NamedCommands.registerCommand("l4", l4State());
+      NamedCommands.registerCommand("l3", l3State());
+      NamedCommands.registerCommand("l2", l2State());
+      NamedCommands.registerCommand("defaultState", defaultState());
+      NamedCommands.registerCommand("collectState", collectState());
+      NamedCommands.registerCommand("climbState", climbState());
         
     }
 
@@ -92,8 +100,8 @@ public class RobotContainer {
       drivetrain.setDefaultCommand(
           // Drivetrain will execute this command periodically
           drivetrain.applyRequest(() ->
-              drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                  .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+              drive.withVelocityX(filter.calculate(-joystick.getLeftY() * MaxSpeed)) // Drive forward with negative Y (forward)
+                  .withVelocityY(filter.calculate(-joystick.getLeftX() * MaxSpeed)) // Drive left with negative X (left)
                   .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
           )
       );
@@ -149,7 +157,7 @@ public class RobotContainer {
         joystick.povDown().onTrue(l2State());
         joystick.povRight().onTrue(l3State());
         joystick.povUp().onTrue(l4State());
-        joystick.povLeft().onTrue(ClimbState());
+        joystick.povLeft().onTrue(climbState());
 
       
         elevator.setDefaultCommand(elevator.runElevator());
@@ -161,7 +169,6 @@ public class RobotContainer {
 
     }
 
-     //Moves elevator to different positions, will be revised
   
   public BooleanSupplier armElevatorAtGoal(){
     if(arm.atGoal().getAsBoolean() && elevator.atGoal().getAsBoolean()){
@@ -295,7 +302,7 @@ public class RobotContainer {
     ).until(armElevatorAtGoal());
   }
 
-  public Command ClimbState(){
+  public Command climbState(){
     return sequence
     (
         runOnce(()->{arm.setPosition(-60);}),

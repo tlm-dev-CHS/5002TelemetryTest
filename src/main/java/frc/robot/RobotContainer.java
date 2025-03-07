@@ -88,6 +88,9 @@ public class RobotContainer {
       NamedCommands.registerCommand("defaultState", defaultState());
       NamedCommands.registerCommand("collectState", collectState());
       NamedCommands.registerCommand("climbState", climbState());
+      NamedCommands.registerCommand("runElevator", elevator.runElevator());
+      NamedCommands.registerCommand("runArm", arm.runArm());
+      
 
     }
 

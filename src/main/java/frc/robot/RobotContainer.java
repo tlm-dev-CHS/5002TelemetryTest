@@ -90,7 +90,6 @@ public class RobotContainer {
       NamedCommands.registerCommand("climbState", climbState());
       NamedCommands.registerCommand("runElevator", elevator.runElevator());
       NamedCommands.registerCommand("runArm", arm.runArm());
-
     }
 
     public void configureBindings() {

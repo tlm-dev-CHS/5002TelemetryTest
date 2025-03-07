@@ -11,9 +11,35 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "l4"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "runElevator"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "runArm"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "l4"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         }
       ]

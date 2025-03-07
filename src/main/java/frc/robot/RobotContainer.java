@@ -62,7 +62,7 @@ public class RobotContainer {
     public SendableChooser<Boolean> mode = new SendableChooser<Boolean>();
     private final SendableChooser<Command> autoChooser;
 
-    private SlewRateLimiter filter = new SlewRateLimiter(0.75);
+    //private SlewRateLimiter filter = new SlewRateLimiter(0.75);
    
 
     public RobotContainer() {
@@ -88,7 +88,7 @@ public class RobotContainer {
       NamedCommands.registerCommand("defaultState", defaultState());
       NamedCommands.registerCommand("collectState", collectState());
       NamedCommands.registerCommand("climbState", climbState());
-        
+
     }
 
     public void configureBindings() {
@@ -169,6 +169,7 @@ public class RobotContainer {
 
     }
 
+     //Moves elevator to different positions, will be revised
   
   public BooleanSupplier armElevatorAtGoal(){
     if(arm.atGoal().getAsBoolean() && elevator.atGoal().getAsBoolean()){

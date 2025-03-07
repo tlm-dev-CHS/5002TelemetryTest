@@ -261,7 +261,7 @@ public class RobotContainer {
     return sequence
     (
         runOnce(()->{arm.setPosition(0.0);}),
-        waitUntil(()->Math.abs(elevator.getMeasurement()) < -30),
+        waitUntil(()->Math.abs(arm.getMeasurement()) < 30),
         runOnce(()->{elevator.moveToPosition(1.0);})
         
     ).until(armElevatorAtGoal());
@@ -281,7 +281,7 @@ public class RobotContainer {
     return sequence
     (
         runOnce(()->{elevator.moveToPosition(27.0);}),
-        waitUntil(()->elevator.getMeasurement() > 25.0),
+        waitUntil(()->elevator.getMeasurement() > 20.0),
         runOnce(()->{arm.setPosition(-40);})
     ).until(armElevatorAtGoal());
   }
@@ -290,7 +290,7 @@ public class RobotContainer {
     return sequence
     (
         runOnce(()->{elevator.moveToPosition(15.25);}),
-        waitUntil(()->elevator.getMeasurement() > 12.0),
+        waitUntil(()->elevator.getMeasurement() > 8.0),
         runOnce(()->{arm.setPosition(-36);})
     ).until(armElevatorAtGoal());
   }
@@ -308,7 +308,7 @@ public class RobotContainer {
     return sequence
     (
         runOnce(()->{arm.setPosition(-60);}),
-        waitUntil(()->elevator.getMeasurement() < -30),
+        waitUntil(()->arm.getMeasurement() < -30),
         runOnce(()->{elevator.moveToPosition(0.5);})
  
         
@@ -319,7 +319,7 @@ public class RobotContainer {
     return sequence
     (
         runOnce(()->{arm.setPosition(-45);}),
-        waitUntil(()->elevator.getMeasurement() < -30),
+        waitUntil(()->arm.getMeasurement() < -30),
         runOnce(()->{elevator.moveToPosition(12.25);})
  
         
@@ -330,7 +330,7 @@ public class RobotContainer {
     return sequence
     (
         runOnce(()->{arm.setPosition(-45);}),
-        waitUntil(()->elevator.getMeasurement() < -30),
+        waitUntil(()->arm.getMeasurement() < -30),
         runOnce(()->{elevator.moveToPosition(4.5);})
  
         

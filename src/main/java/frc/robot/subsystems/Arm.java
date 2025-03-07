@@ -38,7 +38,7 @@ public class Arm extends SubsystemBase {
     final RelativeEncoder encoder = m_armRotator.getEncoder();
     final AbsoluteEncoder rotatorAbsoluteEncoder = m_armRotator.getAbsoluteEncoder();
 
-    PIDController m_controller = new PIDController(0.25, 0, 0);
+    PIDController m_controller = new PIDController(0.15, 0, 0);
     public double goal = 0.0;
     double factor = 0.0;
 

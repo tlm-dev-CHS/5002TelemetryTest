@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "path",
+          "data": {
+            "pathName": "Stationary"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "climbState"

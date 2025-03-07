@@ -76,7 +76,7 @@ public class RobotContainer {
         System.out.println("NO MODE");
       }
         
-      autoChooser = AutoBuilder.buildAutoChooser("Test Auto");
+      autoChooser = AutoBuilder.buildAutoChooser("Climb");
       SmartDashboard.putData("Auto Mode", autoChooser);
 
       //REGISTER AUTO COMMANDS
@@ -88,6 +88,8 @@ public class RobotContainer {
       NamedCommands.registerCommand("defaultState", defaultState());
       NamedCommands.registerCommand("collectState", collectState());
       NamedCommands.registerCommand("climbState", climbState());
+      NamedCommands.registerCommand("runElevator", elevator.runElevator());
+      NamedCommands.registerCommand("runArm", arm.runArm());
 
     }
 
@@ -305,13 +307,12 @@ public class RobotContainer {
   }
 
   public Command climbState(){
+    System.out.println("CLIMB STATE");
     return sequence
     (
         runOnce(()->{arm.setPosition(-60);}),
         waitUntil(()->arm.getMeasurement() < -30),
         runOnce(()->{elevator.moveToPosition(0.5);})
- 
-        
     ).until(armElevatorAtGoal());
   }
 

@@ -17,7 +17,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "elevatorTop"
+                  "name": "l4"
                 }
               },
               {
@@ -29,13 +29,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 3.0
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "defaultState"
+                  "waitTime": 1.0
                 }
               }
             ]
@@ -54,12 +48,6 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "collectState"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
                   "name": "intake"
                 }
               },
@@ -67,12 +55,6 @@
                 "type": "wait",
                 "data": {
                   "waitTime": 2.0
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "defaultState"
                 }
               }
             ]
@@ -91,7 +73,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "elevatorTop"
+                  "name": "l4"
                 }
               },
               {
@@ -109,16 +91,10 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "defaultState"
+                  "name": "collectState"
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "MiddleA4"
           }
         }
       ]

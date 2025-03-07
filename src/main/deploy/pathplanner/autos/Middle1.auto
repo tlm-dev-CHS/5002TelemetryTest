@@ -17,13 +17,13 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "l4"
+                  "name": null
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "shoot"
+                  "name": null
                 }
               },
               {
@@ -48,7 +48,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "intake"
+                  "name": null
                 }
               },
               {
@@ -73,13 +73,13 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "l4"
+                  "name": null
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "shoot"
+                  "name": null
                 }
               },
               {
@@ -91,7 +91,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "collectState"
+                  "name": null
                 }
               }
             ]

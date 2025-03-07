@@ -112,7 +112,8 @@ public class RobotContainer {
       joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
       
       //Auto Allign to April Tag
-      joystick.leftBumper().onTrue(autoAlign);
+      joystick.leftBumper().onTrue(l3RemoveState());
+      joystick.rightBumper().onTrue(l2RemoveState());
 
       //Use Shooter
       joystick.rightTrigger().whileTrue(shoot());
@@ -313,6 +314,27 @@ public class RobotContainer {
     ).until(armElevatorAtGoal());
   }
 
+  public Command l3RemoveState(){
+    return sequence
+    (
+        runOnce(()->{arm.setPosition(-45);}),
+        waitUntil(()->elevator.getMeasurement() < -30),
+        runOnce(()->{elevator.moveToPosition(12.25);})
+ 
+        
+    ).until(armElevatorAtGoal());
+  }
+
+  public Command l2RemoveState(){
+    return sequence
+    (
+        runOnce(()->{arm.setPosition(-45);}),
+        waitUntil(()->elevator.getMeasurement() < -30),
+        runOnce(()->{elevator.moveToPosition(4.5);})
+ 
+        
+    ).until(armElevatorAtGoal());
+  }
 
   
   public Command getAutonomousCommand() {

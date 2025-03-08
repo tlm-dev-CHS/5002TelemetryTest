@@ -14,7 +14,9 @@ import com.ctre.phoenix.sensors.PigeonIMU.CalibrationMode;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -47,7 +49,7 @@ import java.util.function.BooleanSupplier;
 
 
 public class RobotContainer {
-
+    
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
@@ -60,15 +62,17 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
+    
+
     public CommandXboxController joystick = new CommandXboxController(0);
     private final CommandXboxController coJoystick = new CommandXboxController(1);
 
-    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    public final CommandSwerveDrivetrain drivetrain; 
     public final static Elevator elevator = new Elevator();
     public final static Intake intake = new Intake();
     public final Arm arm = new Arm();
     public final Climber climber = new Climber();
-    public final autoAlign autoAlign = new autoAlign(drivetrain, joystick,2);
+    //public final autoAlign autoAlign = new autoAlign(drivetrain, joystick,2);
     public SendableChooser<Boolean> mode = new SendableChooser<Boolean>();
     private final SendableChooser<Command> autoChooser;
     
@@ -92,8 +96,6 @@ public class RobotContainer {
       //JSONObject jsonData = Files.readString(path);
       
         
-      autoChooser = AutoBuilder.buildAutoChooser("Test Auto");
-      SmartDashboard.putData("Auto Mode", autoChooser);
 
       //REGISTER AUTO COMMANDS
       NamedCommands.registerCommand("intake", intake());
@@ -107,13 +109,14 @@ public class RobotContainer {
       NamedCommands.registerCommand("runElevator", elevator.runElevator());
       NamedCommands.registerCommand("runArm", arm.runArm());
       
-      try{
-        middleA1 = PathPlannerPath.fromPathFile("Middlepath");
-      } catch(Exception e){
-        DriverStation.reportError("Uh oh" + e.getMessage(), e.getStackTrace());
-      } 
+
+      autoChooser = AutoBuilder.buildAutoChooser("Test Auto");
+      SmartDashboard.putData("Auto Mode", autoChooser);
+      
+      drivetrain = TunerConstants.createDrivetrain();
 
     }
+
 
     public void configureBindings() {
       if(mode.getSelected() == null){
@@ -136,7 +139,7 @@ public class RobotContainer {
       joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
       
       //Auto Allign to April Tag
-      joystick.leftBumper().onTrue(autoAlign);
+      //joystick.leftBumper().onTrue(autoAlign);
 
       //Use Shooter
       joystick.rightTrigger().whileTrue(shoot());
@@ -352,7 +355,6 @@ public class RobotContainer {
       stopIntake()
     );
   }
-
 
   
   public Command getAutonomousCommand() {

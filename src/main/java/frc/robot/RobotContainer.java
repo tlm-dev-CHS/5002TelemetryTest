@@ -46,6 +46,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.BooleanSupplier;
+import java.util.jar.Attributes.Name;
 
 
 public class RobotContainer {
@@ -102,7 +103,7 @@ public class RobotContainer {
 
       //REGISTER AUTO COMMANDS
       NamedCommands.registerCommand("intake", intake());
-      NamedCommands.registerCommand("shoot", shoot());
+      NamedCommands.registerCommand("shoot", shootOnce());
       NamedCommands.registerCommand("l4", l4State());
       NamedCommands.registerCommand("l3", l3State());
       NamedCommands.registerCommand("l2", l2State());
@@ -111,6 +112,7 @@ public class RobotContainer {
       NamedCommands.registerCommand("climbState", climbState());
       NamedCommands.registerCommand("runElevator", elevator.runElevator());
       NamedCommands.registerCommand("runArm", arm.runArm());
+      NamedCommands.registerCommand("stop", stopShoot());
       
       drivetrain = TunerConstants.createDrivetrain();
       autoChooser = AutoBuilder.buildAutoChooser("Middle L4");
@@ -279,9 +281,15 @@ public class RobotContainer {
   }
 
   public Command shoot(){
-    return run(()->{intake.runIntake(8);}, intake).finallyDo(()->intake.stopIntake());
+    return run(()->{intake.runIntake(8);},  intake).finallyDo(()->intake.stopIntake());
   }
 
+  public Command shootOnce(){
+    return sequence(runOnce(()->{intake.runIntake(8);}, intake), waitSeconds(1.0), runOnce(()->{intake.runIntake(0);}, intake));
+  }
+  public Command stopShoot(){
+    return runOnce(()->{intake.runIntake(0.0);}, intake);
+  }
   //Climber Commands
   public Command climb(){
     return run(()->{climber.runClimber(6.0);}).finallyDo(()->climber.stop());

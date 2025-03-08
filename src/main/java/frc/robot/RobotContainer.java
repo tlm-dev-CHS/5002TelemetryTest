@@ -349,28 +349,6 @@ public class RobotContainer {
     ).until(armElevatorAtGoal());
   }
 
-  public Command l3RemoveState(){
-    return sequence
-    (
-        runOnce(()->{arm.setPosition(-45);}),
-        waitUntil(()->arm.getMeasurement() < -30),
-        runOnce(()->{elevator.moveToPosition(12.25);})
- 
-        
-    ).until(armElevatorAtGoal());
-  }
-
-  public Command l2RemoveState(){
-    return sequence
-    (
-        runOnce(()->{arm.setPosition(-45);}),
-        waitUntil(()->arm.getMeasurement() < -30),
-        runOnce(()->{elevator.moveToPosition(4.5);})
- 
-        
-    ).until(armElevatorAtGoal());
-  }
-
   public Command algeaTop(){
     return sequence
     (

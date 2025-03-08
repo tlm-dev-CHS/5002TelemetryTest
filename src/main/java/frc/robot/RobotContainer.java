@@ -305,9 +305,9 @@ public class RobotContainer {
   public Command collectState(){
     return sequence
     (
-        runOnce(()->{elevator.moveToPosition(20.0);}),
+        runOnce(()->{elevator.moveToPosition(19.87);}),
         waitUntil(()->elevator.getMeasurement() > 10),
-        runOnce(()->{arm.setPosition(156);})
+        runOnce(()->{arm.setPosition(141.5);})
     ).until(armElevatorAtGoal());
 
   }
@@ -315,9 +315,9 @@ public class RobotContainer {
   public Command l4State(){
     return sequence
     (
-        runOnce(()->{elevator.moveToPosition(27.0);}),
+        runOnce(()->{elevator.moveToPosition(27.63);}),
         waitUntil(()->elevator.getMeasurement() > 20.0),
-        runOnce(()->{arm.setPosition(-40);})
+        runOnce(()->{arm.setPosition(-41.8);})
     ).until(armElevatorAtGoal());
   }
 

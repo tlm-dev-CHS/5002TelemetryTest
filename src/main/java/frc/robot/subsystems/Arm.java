@@ -6,6 +6,7 @@ import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
 
 import java.util.function.BooleanSupplier;
 
+import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
@@ -34,7 +35,7 @@ public class Arm extends SubsystemBase {
     final SparkMax m_armRotator = new SparkMax(OperatorConstants.m_armRotator, MotorType.kBrushless);
 
     SparkMaxConfig rotatorConfig = new SparkMaxConfig();
-    
+
     final RelativeEncoder encoder = m_armRotator.getEncoder();
     final AbsoluteEncoder rotatorAbsoluteEncoder = m_armRotator.getAbsoluteEncoder();
 

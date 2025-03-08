@@ -47,6 +47,18 @@
                       "data": {
                         "name": "shoot"
                       }
+                    },
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 1.0
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "stop"
+                      }
                     }
                   ]
                 }

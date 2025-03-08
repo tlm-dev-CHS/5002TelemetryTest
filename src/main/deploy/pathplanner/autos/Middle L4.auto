@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "path",
+          "data": {
+            "pathName": "Middle Path"
+          }
+        },
+        {
           "type": "parallel",
           "data": {
             "commands": [
@@ -24,12 +30,6 @@
                 "type": "sequential",
                 "data": {
                   "commands": [
-                    {
-                      "type": "path",
-                      "data": {
-                        "pathName": "Middle Path"
-                      }
-                    },
                     {
                       "type": "named",
                       "data": {

@@ -15,11 +15,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class autoRotate extends SubsystemBase{
     private final PhotonCamera camera;
     private final PIDController rPidController;
+    private final CommandSwerveDrivetrain swerveDrive;
     private final SwerveRequest.RobotCentric requester;
     private double setPoint;
     private int targetID;
 
-    public autoRotate(int targetAID){
+    public autoRotate(int targetAID, CommandSwerveDrivetrain drivetrain){
+        swerveDrive = drivetrain;
         camera = new PhotonCamera("photonvision");
         rPidController = new PIDController(.5, 0, 0);
         rPidController.setTolerance(0.1);
@@ -33,15 +35,23 @@ public class autoRotate extends SubsystemBase{
         boolean hasTargets = result.hasTargets();
 
         if (hasTargets){
+
             PhotonTrackedTarget target = result.getBestTarget();
+
             if (target.getFiducialId() == targetID){
+
                 Transform3d bestCameraToTarget = target.getBestCameraToTarget();
+                double rError = target.getYaw();
+                double xError = bestCameraToTarget.getX();
+                double yError = bestCameraToTarget.getY();
+
+                double angle = Math.atan(yError / xError);
+
+                double output = rPidController.calculate(rError, angle);
+                swerveDrive.setControl(requester.withRotationalRate(output));
         
             }
-
         }
-        //boolean hasTargets = camera.
-        //if (result != none)
     }
 }
 

@@ -6,14 +6,21 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import org.json.simple.JSONObject;
+import java.nio.file.Files;
+
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix.sensors.PigeonIMU.CalibrationMode;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -35,9 +42,14 @@ import static edu.wpi.first.wpilibj2.command.Commands.sequence;
 import static edu.wpi.first.wpilibj2.command.Commands.waitSeconds;
 import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.function.BooleanSupplier;
 
+
 public class RobotContainer {
+    
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
@@ -50,17 +62,22 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
+    
+
     public CommandXboxController joystick = new CommandXboxController(0);
     private final CommandXboxController coJoystick = new CommandXboxController(1);
 
-    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    public final CommandSwerveDrivetrain drivetrain; 
     public final static Elevator elevator = new Elevator();
     public final static Intake intake = new Intake();
     public final Arm arm = new Arm();
     public final Climber climber = new Climber();
-    public final autoAlign autoAlign = new autoAlign(drivetrain, joystick,2);
+    //public final autoAlign autoAlign = new autoAlign(drivetrain, joystick,2);
     public SendableChooser<Boolean> mode = new SendableChooser<Boolean>();
     private final SendableChooser<Command> autoChooser;
+    
+    PathPlannerPath middleA1;
+
 
     //private SlewRateLimiter filter = new SlewRateLimiter(0.75);
    
@@ -75,9 +92,13 @@ public class RobotContainer {
       if(mode.getSelected() == null){
         System.out.println("NO MODE");
       }
+      //Path path = Paths.get("src\\main\\deploy\\pathplanner\\paths\\Middlepath.path");
+      //JSONObject jsonData = Files.readString(path);
+      
         
-      autoChooser = AutoBuilder.buildAutoChooser("Climb");
-      SmartDashboard.putData("Auto Mode", autoChooser);
+
+
+
 
       //REGISTER AUTO COMMANDS
       NamedCommands.registerCommand("intake", intake());
@@ -90,7 +111,14 @@ public class RobotContainer {
       NamedCommands.registerCommand("climbState", climbState());
       NamedCommands.registerCommand("runElevator", elevator.runElevator());
       NamedCommands.registerCommand("runArm", arm.runArm());
+      
+      drivetrain = TunerConstants.createDrivetrain();
+      autoChooser = AutoBuilder.buildAutoChooser("Middle L4");
+      SmartDashboard.putData("Auto Mode", autoChooser);
+  
+
     }
+
 
     public void configureBindings() {
       if(mode.getSelected() == null){
@@ -113,8 +141,7 @@ public class RobotContainer {
       joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
       
       //Auto Allign to April Tag
-      joystick.leftBumper().onTrue(l3RemoveState());
-      joystick.rightBumper().onTrue(l2RemoveState());
+      //joystick.leftBumper().onTrue(autoAlign);
 
       //Use Shooter
       joystick.rightTrigger().whileTrue(shoot());
@@ -161,6 +188,9 @@ public class RobotContainer {
         joystick.povUp().onTrue(l4State());
         joystick.povLeft().onTrue(climbState());
 
+        //remove algea
+        joystick.leftBumper().onTrue(algeaTop());
+        joystick.rightBumper().onTrue(algeaBot());
       
         elevator.setDefaultCommand(elevator.runElevator());
         arm.setDefaultCommand(arm.runArm());
@@ -242,6 +272,10 @@ public class RobotContainer {
   //INTAKE COMMANDS
   public Command intake(){
     return run(()->{intake.runIntake(-8);}).finallyDo(()->intake.stopIntake());
+  }
+
+  public Command stopIntake(){
+    return run(()->intake.stopIntake());
   }
 
   public Command shoot(){
@@ -337,11 +371,32 @@ public class RobotContainer {
     ).until(armElevatorAtGoal());
   }
 
+  public Command algeaTop(){
+    return sequence
+    (
+        runOnce(()->{arm.setPosition(-45);}),
+        waitUntil(()->arm.getMeasurement() < -30),
+        runOnce(()->{elevator.moveToPosition(12.25);})
+ 
+        
+    ).until(armElevatorAtGoal());
+  }
+
+  public Command algeaBot(){
+    return sequence
+    (
+        runOnce(()->{arm.setPosition(-45);}),
+        waitUntil(()->arm.getMeasurement() < -30),
+        runOnce(()->{elevator.moveToPosition(4.5);})
+ 
+        
+    ).until(armElevatorAtGoal());
+  }
+
   
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();
   }
-
 
   }
 

@@ -25,6 +25,7 @@ public class autoAlign extends Command {
     private final PIDController yPidController;
 
     private final int targetID;
+    
     private final Timer lostTargetTimer = new Timer();
         private CommandXboxController controller;
     
@@ -76,6 +77,8 @@ public class autoAlign extends Command {
                 Math.atan(OoverA);
 
                 double rOutput = rotationController.calculate(rError, OoverA);
+                double yOutput = yPidController.calculate(yError, 0);
+                double xOutput = xPidController.calculate(xError, 0);
 
                 System.out.println("rError:" + rError + "||" + "yError:" + yError + "||" +"xError:" + xError);
 

@@ -6,14 +6,19 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import org.json.simple.JSONObject;
+import java.nio.file.Files;
+
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix.sensors.PigeonIMU.CalibrationMode;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -35,9 +40,14 @@ import static edu.wpi.first.wpilibj2.command.Commands.sequence;
 import static edu.wpi.first.wpilibj2.command.Commands.waitSeconds;
 import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.function.BooleanSupplier;
 
+
 public class RobotContainer {
+
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
@@ -61,6 +71,9 @@ public class RobotContainer {
     public final autoAlign autoAlign = new autoAlign(drivetrain, joystick,2);
     public SendableChooser<Boolean> mode = new SendableChooser<Boolean>();
     private final SendableChooser<Command> autoChooser;
+    
+    PathPlannerPath middleA1;
+
 
     //private SlewRateLimiter filter = new SlewRateLimiter(0.75);
    
@@ -75,6 +88,9 @@ public class RobotContainer {
       if(mode.getSelected() == null){
         System.out.println("NO MODE");
       }
+      //Path path = Paths.get("src\\main\\deploy\\pathplanner\\paths\\Middlepath.path");
+      //JSONObject jsonData = Files.readString(path);
+      
         
       autoChooser = AutoBuilder.buildAutoChooser("Test Auto");
       SmartDashboard.putData("Auto Mode", autoChooser);
@@ -91,6 +107,11 @@ public class RobotContainer {
       NamedCommands.registerCommand("runElevator", elevator.runElevator());
       NamedCommands.registerCommand("runArm", arm.runArm());
       
+      try{
+        middleA1 = PathPlannerPath.fromPathFile("Middlepath");
+      } catch(Exception e){
+        DriverStation.reportError("Uh oh" + e.getMessage(), e.getStackTrace());
+      } 
 
     }
 
@@ -245,6 +266,10 @@ public class RobotContainer {
     return run(()->{intake.runIntake(-8);}).finallyDo(()->intake.stopIntake());
   }
 
+  public Command stopIntake(){
+    return run(()->intake.stopIntake());
+  }
+
   public Command shoot(){
     return run(()->{intake.runIntake(8);}, intake).finallyDo(()->intake.stopIntake());
   }
@@ -317,12 +342,22 @@ public class RobotContainer {
     ).until(armElevatorAtGoal());
   }
 
+  public Command l3autoMiddle1(){
+    return sequence(
+      run(()->{AutoBuilder.followPath(middleA1);}),
+      waitSeconds(0.5),
+      l3State(),
+      shoot(),
+      waitSeconds(1),
+      stopIntake()
+    );
+  }
+
 
   
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();
   }
-
 
   }
 

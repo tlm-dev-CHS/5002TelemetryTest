@@ -102,7 +102,7 @@ public class RobotContainer {
 
 
       //REGISTER AUTO COMMANDS
-      NamedCommands.registerCommand("intake", intake());
+      NamedCommands.registerCommand("intake", intakeOnce());
       NamedCommands.registerCommand("shoot", shootOnce());
       NamedCommands.registerCommand("l4", l4State());
       NamedCommands.registerCommand("l3", l3State());
@@ -283,9 +283,12 @@ public class RobotContainer {
   public Command shoot(){
     return run(()->{intake.runIntake(8);},  intake).finallyDo(()->intake.stopIntake());
   }
+  public Command intakeOnce(){
+    return sequence(runOnce(()->{intake.runIntake(-8);}, intake), waitSeconds(3.0), runOnce(()->{intake.stopIntake();}, intake));
+  }
 
   public Command shootOnce(){
-    return sequence(runOnce(()->{intake.runIntake(8);}, intake), waitSeconds(1.0), runOnce(()->{intake.runIntake(0);}, intake));
+    return sequence(runOnce(()->{intake.runIntake(8);}, intake), waitSeconds(1.0), runOnce(()->{intake.stopIntake();}, intake));
   }
   public Command stopShoot(){
     return runOnce(()->{intake.runIntake(0.0);}, intake);

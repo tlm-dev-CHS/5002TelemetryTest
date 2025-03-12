@@ -33,6 +33,7 @@ import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.vision;
 
 import static edu.wpi.first.wpilibj2.command.Commands.either;
 import static edu.wpi.first.wpilibj2.command.Commands.none;
@@ -74,9 +75,12 @@ public class RobotContainer {
     public final static Intake intake = new Intake();
     public final Arm arm = new Arm();
     public final Climber climber = new Climber();
+    public final vision vision;
     //public final autoAlign autoAlign = new autoAlign(drivetrain, joystick,2);
     public SendableChooser<Boolean> mode = new SendableChooser<Boolean>();
     private final SendableChooser<Command> autoChooser;
+
+    
     
     PathPlannerPath middleA1;
 
@@ -118,7 +122,8 @@ public class RobotContainer {
       drivetrain = TunerConstants.createDrivetrain();
       autoChooser = AutoBuilder.buildAutoChooser("Middle L4");
       SmartDashboard.putData("Auto Mode", autoChooser);
-  
+      
+      vision = new vision(drivetrain);
 
     }
 

@@ -215,12 +215,8 @@ public class RobotContainer {
     }
   }
 
-  public Command changeState(double elevatorPosition, double armPosition, boolean armFirst){
-    return either(
-      sequence(
-        runOnce(()->{arm.setPosition(armPosition);}),
-        waitUntil(()->Math.abs(arm.getMeasurement()) > Math.abs(armPosition) - 30 && Math.abs(arm.getMeasurement()) < Math.abs(armPosition) + 30),
-        runOnce(()->{elevator.moveToPosition(elevatorPosition);})),
+  public Command changeState(double elevatorPosition, double armPosition){
+    return 
       either(
         sequence(
           runOnce(()->{arm.setPosition(0);}),
@@ -232,9 +228,7 @@ public class RobotContainer {
           runOnce(()->{elevator.moveToPosition(elevatorPosition);}),
           waitUntil(()->elevator.getMeasurement() > elevatorPosition - 2.5 && elevator.getMeasurement() < elevatorPosition + 2.5),
           runOnce(()->{arm.setPosition(armPosition);})),
-        ()->Math.abs(arm.getMeasurement()) < armPosition + 5 && Math.abs(arm.getMeasurement()) > armPosition - 5 
-      ),
-      ()->armFirst).until(armElevatorAtGoal());
+      ()->Math.abs(arm.getMeasurement()) > 25).until(armElevatorAtGoal());
   }
 
   //ELEVATOR COMMANDS
@@ -302,82 +296,35 @@ public class RobotContainer {
 
   //SEQUENCE COMMANDS
   public Command defaultState(){
-    return sequence
-    (
-        runOnce(()->{arm.setPosition(0.0);}),
-        waitUntil(()->Math.abs(arm.getMeasurement()) < 30),
-        runOnce(()->{elevator.moveToPosition(1.0);})
-        
-    ).until(armElevatorAtGoal());
+    return changeState(1.0, 0.0);
   }
 
   public Command collectState(){
-    return sequence
-    (
-        runOnce(()->{elevator.moveToPosition(19.87);}),
-        waitUntil(()->elevator.getMeasurement() > 10),
-        runOnce(()->{arm.setPosition(141.5);})
-    ).until(armElevatorAtGoal());
-
+    return changeState(19.87, 141.5);
   }
 
   public Command l4State(){
-    return sequence
-    (
-        runOnce(()->{elevator.moveToPosition(27.63);}),
-        waitUntil(()->elevator.getMeasurement() > 20.0),
-        runOnce(()->{arm.setPosition(-41.8);})
-    ).until(armElevatorAtGoal());
+    return changeState(27.63, -41.8);
   }
 
   public Command l3State(){
-    return sequence
-    (
-        runOnce(()->{elevator.moveToPosition(15.25);}),
-        waitUntil(()->elevator.getMeasurement() > 8.0),
-        runOnce(()->{arm.setPosition(-36);})
-    ).until(armElevatorAtGoal());
+    return changeState(15.25, -36);
   }
 
   public Command l2State(){
-    return sequence
-    (
-        runOnce(()->{elevator.moveToPosition(7.31);}),
-        waitUntil(()->elevator.getMeasurement() > 5.0),
-        runOnce(()->{arm.setPosition(-36);})
-    ).until(armElevatorAtGoal());
+    return changeState(7.31, -36);
   }
 
   public Command climbState(){
-    System.out.println("CLIMB STATE");
-    return sequence
-    (
-        runOnce(()->{arm.setPosition(-60);}),
-        waitUntil(()->arm.getMeasurement() < -30),
-        runOnce(()->{elevator.moveToPosition(0.5);})
-    ).until(armElevatorAtGoal());
+    return changeState(0.5, -60);
   }
 
   public Command algeaTop(){
-    return sequence
-    (
-        runOnce(()->{arm.setPosition(-45);}),
-        waitUntil(()->arm.getMeasurement() < -30),
-        runOnce(()->{elevator.moveToPosition(12.25);})
- 
-        
-    ).until(armElevatorAtGoal());
+    return changeState(12.25, -45);
   }
 
   public Command algeaBot(){
-    return sequence
-    (
-        runOnce(()->{arm.setPosition(-45);}),
-        waitUntil(()->arm.getMeasurement() < -30),
-        runOnce(()->{elevator.moveToPosition(4.5);})
- 
-        
-    ).until(armElevatorAtGoal());
+    return changeState(4.5, -45);
   }
 
   

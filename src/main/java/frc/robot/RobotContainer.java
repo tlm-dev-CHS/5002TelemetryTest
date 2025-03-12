@@ -26,6 +26,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -194,8 +196,7 @@ public class RobotContainer {
       
         elevator.setDefaultCommand(elevator.runElevator());
         arm.setDefaultCommand(arm.runArm());
-
-          }
+        }
 
       drivetrain.registerTelemetry(logger::telemeterize);
 
@@ -220,7 +221,7 @@ public class RobotContainer {
           runOnce(()->{elevator.moveToPosition(elevatorPosition);}),
           waitUntil(()->elevator.getMeasurement() > elevatorPosition - 5 && elevator.getMeasurement() < elevatorPosition + 5),
           runOnce(()->{arm.setPosition(armPosition);})),
-      ()->Math.abs(arm.getMeasurement()) > 50).until(armElevatorAtGoal());
+      ()->Math.abs(arm.getMeasurement()) > 50).until(armElevatorAtGoal()).withInterruptBehavior(InterruptionBehavior.kCancelSelf);
   }
 
   //ELEVATOR COMMANDS

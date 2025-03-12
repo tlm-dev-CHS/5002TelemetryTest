@@ -124,7 +124,7 @@ public class RobotContainer {
       SmartDashboard.putData("Auto Mode", autoChooser);
       
       vision = new vision(drivetrain);
-      align = new autoAlign(drivetrain, joystick, 0);
+      align = new autoAlign(drivetrain, joystick, 5);
     }
 
     public void configureBindings() {
@@ -148,7 +148,7 @@ public class RobotContainer {
       joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
       
       //Auto Allign to April Tag
-      joystick.leftBumper().onTrue(align);
+      joystick.leftBumper().whileTrue(align);
 
       //Use Shooter
       joystick.rightTrigger().whileTrue(shoot());

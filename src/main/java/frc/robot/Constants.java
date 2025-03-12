@@ -51,7 +51,7 @@ public final class Constants
     //Arm Constants
     public final int beamBreakId = 0;
 
-    //Elevator feedforward
+    //Vision
   }
 
   public static final class RobotConstants{

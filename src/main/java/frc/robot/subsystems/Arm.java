@@ -80,18 +80,7 @@ public class Arm extends SubsystemBase {
         goal = position;
     }
     public Command runArm(){
-        return run(()->{
-            if((elevator.getMeasurement() < 10 && Math.abs(goal) < 90) || (elevator.getMeasurement() >= 10)){
-                m_armRotator.set(m_controller.calculate(getMeasurement(), goal));
-            }
-
-            /*if(encoder.getVelocity() > 10){
-                intake.runIntake(1);
-            }
-            else{
-                intake.runIntake(0);
-            }*/
-        });
+        return run(()->{m_armRotator.set(m_controller.calculate(getMeasurement(), goal));});
     }
     
     public void runMotor(double d){

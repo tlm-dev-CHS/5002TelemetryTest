@@ -21,11 +21,13 @@ import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Arm;
@@ -68,7 +70,16 @@ public class RobotContainer {
     
 
     public CommandXboxController joystick = new CommandXboxController(0);
-    private final CommandXboxController coJoystick = new CommandXboxController(1);
+    private final Joystick coJoystick = new Joystick(1);
+
+    private final JoystickButton l2Button = new JoystickButton(coJoystick, 7);
+    private final JoystickButton l3Button = new JoystickButton(coJoystick, 6);
+    private final JoystickButton l4Button = new JoystickButton(coJoystick, 5);
+    private final JoystickButton defaultButton = new JoystickButton(coJoystick, 14);
+    private final JoystickButton intakeButton = new JoystickButton(coJoystick, 8);
+    private final JoystickButton a2Button = new JoystickButton(coJoystick, 12);
+    private final JoystickButton a3Button = new JoystickButton(coJoystick, 11);
+    private final JoystickButton climbButton = new JoystickButton(coJoystick, 13                                );
 
     public final CommandSwerveDrivetrain drivetrain; 
     public final static Elevator elevator = new Elevator();
@@ -79,14 +90,6 @@ public class RobotContainer {
     //public final autoAlign autoAlign = new autoAlign(drivetrain, joystick,2);
     public SendableChooser<Boolean> mode = new SendableChooser<Boolean>();
     private final SendableChooser<Command> autoChooser;
-
-    
-    
-    PathPlannerPath middleA1;
-
-
-    //private SlewRateLimiter filter = new SlewRateLimiter(0.75);
-   
 
     public RobotContainer() {
 
@@ -100,11 +103,6 @@ public class RobotContainer {
       }
       //Path path = Paths.get("src\\main\\deploy\\pathplanner\\paths\\Middlepath.path");
       //JSONObject jsonData = Files.readString(path);
-      
-        
-
-
-
 
       //REGISTER AUTO COMMANDS
       NamedCommands.registerCommand("intake", intakeOnce());
@@ -124,9 +122,7 @@ public class RobotContainer {
       SmartDashboard.putData("Auto Mode", autoChooser);
       
       vision = new vision(drivetrain);
-
     }
-
 
     public void configureBindings() {
       if(mode.getSelected() == null){
@@ -155,6 +151,9 @@ public class RobotContainer {
       joystick.rightTrigger().whileTrue(shoot());
       joystick.leftTrigger().whileTrue(intake());
 
+      joystick.y().whileTrue(climb());
+      joystick.x().whileTrue(Unclimb());
+
       //CALIBRATION MODE BINDS
       if(mode.getSelected() == true){
         System.out.println("CALIBRATING");
@@ -164,10 +163,6 @@ public class RobotContainer {
         //Zero Arm and Elevator
         joystick.a().onTrue(calibrateElevator());
         joystick.b().onTrue(calibrateArm());
-
-        //Use Climber
-        joystick.y().whileTrue(climb());
-        joystick.x().whileTrue(Unclimb());
 
         //Move Elevator
         joystick.povUp().whileTrue(elevatorUp());
@@ -182,23 +177,20 @@ public class RobotContainer {
         System.out.println("COMPETITION");
 
         //Default State
-        joystick.a().onTrue(defaultState());
+        defaultButton.onTrue(defaultState());
 
         //Collect State
-        joystick.b().onTrue(collectState());
-
-        joystick.y().whileTrue(climb());
-        joystick.x().whileTrue(Unclimb());
+        intakeButton.onTrue(collectState());
 
         //Score Coral
-        joystick.povDown().onTrue(l2State());
-        joystick.povRight().onTrue(l3State());
-        joystick.povUp().onTrue(l4State());
-        joystick.povLeft().onTrue(climbState());
+        l2Button.onTrue(l2State());
+        l3Button.onTrue(l3State());
+        l4Button.onTrue(l4State());
+        climbButton.onTrue(climbState());
 
         //remove algea
-        joystick.leftBumper().onTrue(algeaTop());
-        joystick.rightBumper().onTrue(algeaBot());
+        a2Button.onTrue(algeaBot());
+        a3Button.onTrue(algeaTop());
       
         elevator.setDefaultCommand(elevator.runElevator());
         arm.setDefaultCommand(arm.runArm());
@@ -212,28 +204,23 @@ public class RobotContainer {
      //Moves elevator to different positions, will be revised
   
   public BooleanSupplier armElevatorAtGoal(){
-    if(arm.atGoal().getAsBoolean() && elevator.atGoal().getAsBoolean()){
-      return ()->true;
-    }
-    else{
-      return ()->false;
-    }
+    return ()->arm.atGoal().getAsBoolean() && elevator.atGoal().getAsBoolean();
   }
 
   public Command changeState(double elevatorPosition, double armPosition){
-    return 
+    return
       either(
         sequence(
           runOnce(()->{arm.setPosition(0);}),
-          waitUntil(()->Math.abs(arm.getMeasurement()) < 15),
+          waitUntil(()->Math.abs(arm.getMeasurement()) < 30),
           runOnce(()->{elevator.moveToPosition(elevatorPosition);}),
-          waitUntil(()->elevator.getMeasurement() > elevatorPosition - 2.5 && elevator.getMeasurement() < elevatorPosition + 2.5),
+          waitUntil(()->elevator.getMeasurement() > elevatorPosition - 5 && elevator.getMeasurement() < elevatorPosition + 5),
           runOnce(()->{arm.setPosition(armPosition);})),
         sequence(
           runOnce(()->{elevator.moveToPosition(elevatorPosition);}),
-          waitUntil(()->elevator.getMeasurement() > elevatorPosition - 2.5 && elevator.getMeasurement() < elevatorPosition + 2.5),
+          waitUntil(()->elevator.getMeasurement() > elevatorPosition - 5 && elevator.getMeasurement() < elevatorPosition + 5),
           runOnce(()->{arm.setPosition(armPosition);})),
-      ()->Math.abs(arm.getMeasurement()) > 25).until(armElevatorAtGoal());
+      ()->Math.abs(arm.getMeasurement()) > 50).until(armElevatorAtGoal());
   }
 
   //ELEVATOR COMMANDS

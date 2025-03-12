@@ -34,6 +34,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 
+import static edu.wpi.first.wpilibj2.command.Commands.either;
 import static edu.wpi.first.wpilibj2.command.Commands.none;
 import static edu.wpi.first.wpilibj2.command.Commands.parallel;
 import static edu.wpi.first.wpilibj2.command.Commands.run;
@@ -214,19 +215,29 @@ public class RobotContainer {
     }
   }
 
+  public Command changeState(double elevatorPosition, double armPosition, boolean armFirst){
+    return either(
+      sequence(
+        runOnce(()->{arm.setPosition(armPosition);}),
+        waitUntil(()->Math.abs(arm.getMeasurement()) > Math.abs(armPosition) - 30 && Math.abs(arm.getMeasurement()) < Math.abs(armPosition) + 30),
+        runOnce(()->{elevator.moveToPosition(elevatorPosition);})),
+      either(
+        sequence(
+          runOnce(()->{arm.setPosition(0);}),
+          waitUntil(()->Math.abs(arm.getMeasurement()) < 15),
+          runOnce(()->{elevator.moveToPosition(elevatorPosition);}),
+          waitUntil(()->elevator.getMeasurement() > elevatorPosition - 2.5 && elevator.getMeasurement() < elevatorPosition + 2.5),
+          runOnce(()->{arm.setPosition(armPosition);})),
+        sequence(
+          runOnce(()->{elevator.moveToPosition(elevatorPosition);}),
+          waitUntil(()->elevator.getMeasurement() > elevatorPosition - 2.5 && elevator.getMeasurement() < elevatorPosition + 2.5),
+          runOnce(()->{arm.setPosition(armPosition);})),
+        ()->Math.abs(arm.getMeasurement()) < armPosition + 5 && Math.abs(arm.getMeasurement()) > armPosition - 5 
+      ),
+      ()->armFirst).until(armElevatorAtGoal());
+  }
+
   //ELEVATOR COMMANDS
-  public Command elevatorTop(){
-    return runOnce(()-> {elevator.moveToPosition(20.0);}, elevator);
-  }
-
-  public Command elevatorMid(){
-    return runOnce(()-> {elevator.moveToPosition(14.0);}, elevator);
-  }
-
-  public Command elevatorBottom(){
-    return runOnce(()-> {elevator.moveToPosition(1.0);}, elevator);
-  }
-
   public Command elevatorUp(){
     return run(()-> {elevator.setMotor(0.3);}, elevator).finallyDo(()->elevator.stopMotor());
   }
@@ -246,18 +257,9 @@ public class RobotContainer {
 
   //ARM COMMANDS
   public Command calibrateArm(){
-    return sequence(
-      runOnce(() -> {arm.zero();}, arm)
-    );
+     return runOnce(() -> {arm.zero();}, arm);
   }
 
-  public Command ArmSide(){
-    return runOnce(()->{arm.setPosition(60.0);}, arm);
-  }
-
-  public Command ArmUp(){
-    return runOnce(()->{arm.setPosition(120.0);},arm);
-  }
 
   public Command armCounterClockwise(){
     return run(()->arm.runMotor(2.0)).finallyDo(()->arm.stop());
@@ -276,10 +278,6 @@ public class RobotContainer {
     return run(()->{intake.runIntake(-8);}).finallyDo(()->intake.stopIntake());
   }
 
-  public Command stopIntake(){
-    return run(()->intake.stopIntake());
-  }
-
   public Command shoot(){
     return run(()->{intake.runIntake(8);},  intake).finallyDo(()->intake.stopIntake());
   }
@@ -288,7 +286,7 @@ public class RobotContainer {
   }
 
   public Command shootOnce(){
-    return sequence(runOnce(()->{intake.runIntake(8);}, intake), waitSeconds(1.0), runOnce(()->{intake.stopIntake();}, intake));
+    return sequence(runOnce(()->{intake.runIntake(8);}, intake), waitSeconds(0.5), runOnce(()->{intake.stopIntake();}, intake));
   }
   public Command stopShoot(){
     return runOnce(()->{intake.runIntake(0.0);}, intake);

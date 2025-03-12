@@ -84,12 +84,12 @@ public class RobotContainer {
     private final JoystickButton climbButton = new JoystickButton(coJoystick, 13                                );
 
     public final CommandSwerveDrivetrain drivetrain; 
+    public final autoAlign align; 
     public final static Elevator elevator = new Elevator();
     public final static Intake intake = new Intake();
     public final Arm arm = new Arm();
     public final Climber climber = new Climber();
     public final vision vision;
-    //public final autoAlign autoAlign = new autoAlign(drivetrain, joystick,2);
     public SendableChooser<Boolean> mode = new SendableChooser<Boolean>();
     private final SendableChooser<Command> autoChooser;
 
@@ -124,6 +124,7 @@ public class RobotContainer {
       SmartDashboard.putData("Auto Mode", autoChooser);
       
       vision = new vision(drivetrain);
+      align = new autoAlign(drivetrain, joystick, 0);
     }
 
     public void configureBindings() {
@@ -147,7 +148,7 @@ public class RobotContainer {
       joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
       
       //Auto Allign to April Tag
-      //joystick.leftBumper().onTrue(autoAlign);
+      joystick.leftBumper().onTrue(align);
 
       //Use Shooter
       joystick.rightTrigger().whileTrue(shoot());

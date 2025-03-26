@@ -41,11 +41,11 @@ public class autoAlign extends Command {
         requester = new SwerveRequest.RobotCentric();
 
         // PID Controllers with Tolerance
-        rotationController = new PIDController(1, 0.0, 0.0);
+        rotationController = new PIDController(0.1, 0.0, 0.0);
         xPidController = new PIDController(0.1, 0.0, 0.0);
         yPidController = new PIDController(0.1, 0.0, 0.0);
 
-        rotationController.setTolerance(0.05); 
+        rotationController.setTolerance(1); 
         xPidController.setTolerance(0.02);     
         yPidController.setTolerance(0.02);    
 
@@ -76,14 +76,16 @@ public class autoAlign extends Command {
 
                 Math.atan(OoverA);
 
-                double rOutput = rotationController.calculate(rError, OoverA);
+                double rOutput = rotationController.calculate(rError, 0);
                 double yOutput = yPidController.calculate(yError, 0);
                 double xOutput = xPidController.calculate(xError, 0);
 
                 System.out.println("rError:" + rError + "||" + "yError:" + yError + "||" +"xError:" + xError);
 
-                //swerveDrive.setControl(requester.withRotationalRate(rOutput));
-                //lostTargetTimer.reset(); 
+                swerveDrive.setControl(requester.withRotationalRate(rOutput));
+                lostTargetTimer.reset(); 
+            }else{
+                swerveDrive.setControl(requester.withRotationalRate(0));
             }
         }
 
@@ -98,13 +100,13 @@ public class autoAlign extends Command {
         if (result.hasTargets()) {
             var target = result.getBestTarget();
             if (target.getFiducialId() == targetID) {
-                double roation = target.getYaw();
+                double rotation = target.getYaw();
                 //Transform3d bestCameraToTarget = target.getBestCameraToTarget();
                 //double xError = bestCameraToTarget.getX() - OperatorConstants.distanceToTag;
                 //double yError = bestCameraToTarget.getY();
                 //double rError = target.getYaw();
 
-                return rotationController.atSetpoint();
+                return rotationController.atSetpoint() || !result.hasTargets();
             }
         }
         return false;

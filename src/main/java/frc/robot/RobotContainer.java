@@ -124,7 +124,7 @@ public class RobotContainer {
       SmartDashboard.putData("Auto Mode", autoChooser);
       
       vision = new vision(drivetrain);
-      align = new autoAlign(drivetrain, joystick, 0);
+      align = new autoAlign(drivetrain, joystick, 3);
     }
 
     public void configureBindings() {
@@ -222,7 +222,7 @@ public class RobotContainer {
           runOnce(()->{elevator.moveToPosition(elevatorPosition);}),
           waitUntil(()->elevator.getMeasurement() > elevatorPosition - 5 && elevator.getMeasurement() < elevatorPosition + 5),
           runOnce(()->{arm.setPosition(armPosition);})),
-      ()->Math.abs(arm.getMeasurement()) > 50).until(armElevatorAtGoal()).withInterruptBehavior(InterruptionBehavior.kCancelSelf);
+      ()->Math.abs(arm.getMeasurement()) > 25).until(armElevatorAtGoal()).withInterruptBehavior(InterruptionBehavior.kCancelSelf);
   }
 
   //ELEVATOR COMMANDS
@@ -263,11 +263,11 @@ public class RobotContainer {
 
   //INTAKE COMMANDS
   public Command intake(){
-    return run(()->{intake.runIntake(-8);}).finallyDo(()->intake.stopIntake());
+    return run(()->{intake.runIntake(2);}).finallyDo(()->intake.stopIntake());
   }
 
   public Command shoot(){
-    return run(()->{intake.runIntake(8);},  intake).finallyDo(()->intake.stopIntake());
+    return run(()->{intake.runIntake(-2);},  intake).finallyDo(()->intake.stopIntake());
   }
   public Command intakeOnce(){
     return sequence(runOnce(()->{intake.runIntake(-8);}, intake), waitSeconds(3.0), runOnce(()->{intake.stopIntake();}, intake));

@@ -18,10 +18,13 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 
+import dev.doglog.DogLog;
+import dev.doglog.DogLogOptions;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -69,8 +72,6 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    
-
     public CommandXboxController joystick = new CommandXboxController(0);
     private final Joystick coJoystick = new Joystick(1);
 
@@ -102,9 +103,14 @@ public class RobotContainer {
 
       if(mode.getSelected() == null){
         System.out.println("NO MODE");
+      
       }
-      //Path path = Paths.get("src\\main\\deploy\\pathplanner\\paths\\Middlepath.path");
-      //JSONObject jsonData = Files.readString(path);
+
+      DogLog.setOptions(
+        new DogLogOptions().withNtPublish(true)
+      );
+
+      DogLog.setPdh(new PowerDistribution());
 
       //REGISTER AUTO COMMANDS
       NamedCommands.registerCommand("intake", intakeOnce());
@@ -120,11 +126,15 @@ public class RobotContainer {
       NamedCommands.registerCommand("stop", stopShoot());
       
       drivetrain = TunerConstants.createDrivetrain();
-      autoChooser = AutoBuilder.buildAutoChooser("Middle L4");
+      autoChooser = AutoBuilder.buildAutoChooser("Middle L4 Intake");
       SmartDashboard.putData("Auto Mode", autoChooser);
       
       vision = new vision(drivetrain);
+<<<<<<< HEAD
       align = new autoAlign(drivetrain, joystick, 3);
+=======
+      align = new autoAlign(drivetrain, joystick, 5);
+>>>>>>> be89af28b1876a368985f3b2019e5abf5d5be952
     }
 
     public void configureBindings() {
@@ -148,7 +158,7 @@ public class RobotContainer {
       joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
       
       //Auto Allign to April Tag
-      joystick.leftBumper().onTrue(align);
+      joystick.leftBumper().whileTrue(align);
 
       //Use Shooter
       joystick.rightTrigger().whileTrue(shoot());

@@ -29,7 +29,7 @@ public class vision extends SubsystemBase{
 
     private final CommandSwerveDrivetrain drivetrain;
 
-    public vision(CommandSwerveDrivetrain drivetrain){
+    public vision(CommandSwerveDrivetrain drivetrain){ 
        camera = new PhotonCamera(Constants.OperatorConstants.cameraName);
        aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
        robotToCam = new Transform3d(new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0,0,0));
@@ -61,8 +61,14 @@ public class vision extends SubsystemBase{
     public void periodic(){
         if (getResult().hasTargets()){
             Pose2d pose = photonPoseEstimator.update(getResult()).get().estimatedPose.toPose2d();
+<<<<<<< HEAD
             //var timestamp = photonPoseEstimator.update(getResult()).get().timestampSeconds;
             //drivetrain.addVisionMeasurement(pose, timestamp);
+=======
+            var timestamp = photonPoseEstimator.update(getResult()).get().timestampSeconds;
+            System.out.println(timestamp);
+            drivetrain.addVisionMeasurement(pose, timestamp);
+>>>>>>> be89af28b1876a368985f3b2019e5abf5d5be952
         }
     }**/
 }

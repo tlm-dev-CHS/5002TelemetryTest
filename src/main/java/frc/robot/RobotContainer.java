@@ -130,11 +130,7 @@ public class RobotContainer {
       SmartDashboard.putData("Auto Mode", autoChooser);
       
       vision = new vision(drivetrain);
-<<<<<<< HEAD
       align = new autoAlign(drivetrain, joystick, 3);
-=======
-      align = new autoAlign(drivetrain, joystick, 5);
->>>>>>> be89af28b1876a368985f3b2019e5abf5d5be952
     }
 
     public void configureBindings() {

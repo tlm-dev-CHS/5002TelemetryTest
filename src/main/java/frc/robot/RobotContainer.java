@@ -66,7 +66,8 @@ public class RobotContainer {
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+    private final SwerveRequest.RobotCentric roboDrive = new SwerveRequest.RobotCentric(); // Use open-loop control for drive motors
     //private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     //private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
@@ -130,7 +131,9 @@ public class RobotContainer {
       SmartDashboard.putData("Auto Mode", autoChooser);
       
       vision = new vision(drivetrain);
-      align = new autoAlign(drivetrain, joystick, 3);
+      align = new autoAlign(drivetrain, joystick, 2
+      
+      );
     }
 
     public void configureBindings() {
@@ -154,7 +157,8 @@ public class RobotContainer {
       joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
       
       //Auto Allign to April Tag
-      joystick.leftBumper().whileTrue(align);
+      joystick.leftBumper().whileTrue(strafe(-0.1));
+      joystick.rightBumper().whileTrue(strafe(0.1));
 
       //Use Shooter
       joystick.rightTrigger().whileTrue(shoot());
@@ -269,11 +273,15 @@ public class RobotContainer {
 
   //INTAKE COMMANDS
   public Command intake(){
-    return run(()->{intake.runIntake(2);}).finallyDo(()->intake.stopIntake());
+    return run(()->{intake.runIntake(4);}).finallyDo(()->intake.runIntake(0.5));
+  }
+
+  public Command setIntake(double speed){
+    return run(()->{intake.runIntake(speed);});
   }
 
   public Command shoot(){
-    return run(()->{intake.runIntake(-2);},  intake).finallyDo(()->intake.stopIntake());
+    return run(()->{intake.runIntake(-4);},  intake).finallyDo(()->intake.runIntake(0.5));
   }
   public Command intakeOnce(){
     return sequence(runOnce(()->{intake.runIntake(-8);}, intake), waitSeconds(3.0), runOnce(()->{intake.stopIntake();}, intake));
@@ -325,6 +333,14 @@ public class RobotContainer {
 
   public Command algeaBot(){
     return changeState(4.5, -45);
+  }
+
+  public Command strafe(double speed){
+    return run(()->{drivetrain.applyRequest(()->roboDrive.withVelocityX(0).withVelocityY(speed).withRotationalRate(0));})
+    .finallyDo(() -> drivetrain.applyRequest(() -> drive
+    .withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+    .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+    .withRotationalRate(-joystick.getRightX() * MaxAngularRate)));
   }
 
   

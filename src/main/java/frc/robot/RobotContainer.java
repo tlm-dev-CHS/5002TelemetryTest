@@ -157,8 +157,8 @@ public class RobotContainer {
       joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
       
       //Auto Allign to April Tag
-      joystick.leftBumper().whileTrue(strafe(-0.1));
-      joystick.rightBumper().whileTrue(strafe(0.1));
+      joystick.leftBumper().whileTrue(strafe(-0.75));
+      joystick.rightBumper().whileTrue(strafe(0.75));
 
       //Use Shooter
       joystick.rightTrigger().whileTrue(shoot());
@@ -336,12 +336,25 @@ public class RobotContainer {
   }
 
   public Command strafe(double speed){
-    return run(()->{drivetrain.applyRequest(()->roboDrive.withVelocityX(0).withVelocityY(speed).withRotationalRate(0));})
-    .finallyDo(() -> drivetrain.applyRequest(() -> drive
-    .withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-    .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-    .withRotationalRate(-joystick.getRightX() * MaxAngularRate)));
-  }
+    //return runOnce(()->{System.out.println(speed);});
+    return run(()->{
+      drivetrain.setControl(roboDrive.withVelocityY(speed)
+      );
+    }).finallyDo(() -> 
+       drivetrain.applyRequest(() -> drive
+        .withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+        .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+        .withRotationalRate(-joystick.getRightX() * MaxAngularRate)));
+      // drivetrain.applyRequest(()->roboDrive
+      //   .withVelocityX(0)
+      //   .withVelocityY(0)
+      //   .withRotationalRate(0.5));});
+    // .finallyDo(() -> 
+    //   drivetrain.applyRequest(() -> drive
+    //     .withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+    //     .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+    //     .withRotationalRate(-joystick.getRightX() * MaxAngularRate)));
+    }
 
   
   public Command getAutonomousCommand() {

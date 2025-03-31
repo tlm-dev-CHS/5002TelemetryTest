@@ -9,6 +9,7 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.PhotonUtils;
+import org.photonvision.simulation.VisionSystemSim;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -22,49 +23,71 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class vision extends SubsystemBase{
-    private final PhotonCamera camera; 
-    private final AprilTagFieldLayout aprilTagFieldLayout;
-    private final Transform3d robotToCam;
-    private final PhotonPoseEstimator photonPoseEstimator;
-
-    private final CommandSwerveDrivetrain drivetrain;
-
-    public vision(CommandSwerveDrivetrain drivetrain){ 
-       camera = new PhotonCamera(Constants.OperatorConstants.cameraName);
-       aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
-       robotToCam = new Transform3d(new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0,0,0));
-       photonPoseEstimator =  new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCam);
-
-       this.drivetrain = drivetrain;
-
-    }
-
-    public PhotonPipelineResult getResult(){
-        return camera.getLatestResult();
-    }
-
-    public PhotonTrackedTarget getTracked(){
-        if (getResult() != null){
-            return getResult().getBestTarget();
+    private Pose2d prevPose2d;
+        private final PhotonCamera camera; 
+        private final AprilTagFieldLayout aprilTagFieldLayout;
+        private final Transform3d robotToCam;
+        private final PhotonPoseEstimator photonPoseEstimator;
+        private final VisionSystemSim visionSim;
+        private final CommandSwerveDrivetrain drivetrain;
+    
+        public vision(CommandSwerveDrivetrain drivetrain){ 
+            prevPose2d = drivetrain.getState().Pose;
+            visionSim = new VisionSystemSim("main");
+            camera = new PhotonCamera(Constants.OperatorConstants.cameraName);
+            aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+            visionSim.addAprilTags(aprilTagFieldLayout);
+            robotToCam = new Transform3d(new Translation3d(0.3302, 0.1016, 0.3048), new Rotation3d(0,0,0));
+            photonPoseEstimator =  new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCam);
+    
+            this.drivetrain = drivetrain;
+    
         }
-        else{
-            return null;
+    
+        public PhotonPipelineResult getResult(){
+            return camera.getLatestResult();
         }
-    }
+    
+        public PhotonTrackedTarget getTracked(){
+            PhotonPipelineResult result = getResult();
+            if (result != null){
+                return result.getBestTarget();
+            }
+            else{
+                return null;
+            }
+        }
+    
+        public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
+            PhotonPipelineResult result = getResult();
+    
+            if (prevEstimatedRobotPose != null){
+                photonPoseEstimator.setReferencePose(prevEstimatedRobotPose); 
+            }
+            if (result != null){
+                return photonPoseEstimator.update(result);
+            }
+            else{
+                return Optional.empty();
+            }
+        }
+    
+        @Override
+        public void periodic(){
+            PhotonPipelineResult result = getResult();
+            if (result != null && result.hasTargets()){
+                
+                Optional<EstimatedRobotPose> estimation = getEstimatedGlobalPose(prevPose2d);
+            
+                if (estimation.isPresent()){
+                    Pose2d pose = estimation.get().estimatedPose.toPose2d();
+                    prevPose2d = pose;
+                System.out.println(pose);
+                var timestamp = result.getTimestampSeconds();
+                System.out.println(timestamp);
+                drivetrain.addVisionMeasurement(pose, timestamp);
+            }
 
-    public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
-        photonPoseEstimator.setReferencePose(prevEstimatedRobotPose); 
-        return photonPoseEstimator.update(getResult());
-    }
-
-    @Override
-    public void periodic(){
-        if (getResult().hasTargets()){
-            Optional<EstimatedRobotPose> estimation = getEstimatedGlobalPose(drivetrain.getState().Pose);
-            Pose2d pose = estimation.get().estimatedPose.toPose2d();
-            var timestamp = estimation.get().timestampSeconds;
-            System.out.println(timestamp);
-            drivetrain.addVisionMeasurement(pose, timestamp);
         }
     }
 }

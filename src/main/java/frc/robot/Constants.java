@@ -70,7 +70,7 @@ public final class Constants
 
   public enum AutoAlignStates {
 
-    BLUE_INTAKE(Arrays.asList(0, new Pose2d(new Translation2d(10, 20), Rotation2d.fromDegrees(30))));
+    BLUE_INTAKE(Arrays.asList(7, new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))));
 
     private final List<Object> pose;
 

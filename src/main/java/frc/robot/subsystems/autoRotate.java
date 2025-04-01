@@ -52,14 +52,11 @@ public class autoRotate extends SubsystemBase{
         int goalTag = (int) goal.get(0);
         Pose2d goalPose = (Pose2d) goal.get(1);
 
-        if (target != null && target.getFiducialId() == goalTag){
+        double rOutput = rPidController.calculate(driveTrain.getState().Pose.getRotation().getDegrees(), 168);
+        double xOutput = xPidController.calculate(driveTrain.getState().Pose.getX(), 14.42);
+        double yOutput = yPidController.calculate(driveTrain.getState().Pose.getY(), 4.5);
 
-            double rOutput = rPidController.calculate(driveTrain.getState().Pose.getRotation().getRadians(), goalPose.getRotation().getRadians());
-            double xOutput = xPidController.calculate(driveTrain.getState().Pose.getX(), goalPose.getX());
-            double yOutput = yPidController.calculate(driveTrain.getState().Pose.getY(), goalPose.getY());
-
-            driveTrain.setControl(requester.withVelocityX(xOutput).withVelocityY(yOutput).withRotationalRate(rOutput));
-        }
+        driveTrain.setControl(requester.withVelocityX(xOutput).withVelocityY(yOutput).withRotationalRate(rOutput));
     
     }
 }

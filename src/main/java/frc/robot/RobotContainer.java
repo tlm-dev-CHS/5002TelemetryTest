@@ -40,6 +40,8 @@ import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.autoAlign;
+import frc.robot.subsystems.autoRotate;
 import frc.robot.subsystems.vision;
 
 import static edu.wpi.first.wpilibj2.command.Commands.either;
@@ -86,7 +88,8 @@ public class RobotContainer {
     private final JoystickButton climbButton = new JoystickButton(coJoystick, 13                                );
 
     public final CommandSwerveDrivetrain drivetrain; 
-    public final autoAlign align; 
+    //public final autoAlign align; 
+    public final autoRotate align;
     public final static Elevator elevator = new Elevator();
     public final static Intake intake = new Intake();
     public final Arm arm = new Arm();
@@ -131,9 +134,7 @@ public class RobotContainer {
       SmartDashboard.putData("Auto Mode", autoChooser);
       
       vision = new vision(drivetrain);
-      align = new autoAlign(drivetrain, joystick, 2
-      
-      );
+      align = new autoRotate(drivetrain, vision);
     }
 
     public void configureBindings() {
@@ -157,7 +158,7 @@ public class RobotContainer {
       joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
       
       //Auto Allign to April Tag
-      joystick.leftBumper().whileTrue(strafe(-0.75));
+      joystick.leftBumper().whileTrue(align());
       joystick.rightBumper().whileTrue(strafe(0.75));
 
       //Use Shooter
@@ -355,6 +356,17 @@ public class RobotContainer {
     //     .withVelocityY(-joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
     //     .withRotationalRate(-joystick.getRightX() * MaxAngularRate)));
     }
+
+  public Command align(){
+    return run(()->{
+      align.moveToState(Constants.AutoAlignStates.BLUE_INTAKE);
+    }).finallyDo(()->
+    
+    drivetrain.applyRequest(() -> drive
+     .withVelocityX(-joystick.getLeftY() * MaxSpeed)
+     .withVelocityY(-joystick.getLeftX() * MaxSpeed)
+     .withRotationalRate(-joystick.getRightX() * MaxAngularRate)));
+  }
 
   
   public Command getAutonomousCommand() {

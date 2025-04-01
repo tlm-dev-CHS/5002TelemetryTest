@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.subsystems;
 
 import java.math.RoundingMode;
 
@@ -28,6 +28,7 @@ public class autoAlign extends Command {
     
     private final Timer lostTargetTimer = new Timer();
         private CommandXboxController controller;
+    
     
         private static final double LOST_TARGET_TIMEOUT = 0.5; 
     

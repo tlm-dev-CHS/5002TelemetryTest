@@ -4,8 +4,16 @@
 
 package frc.robot;
 
+import java.lang.Thread.State;
+import java.util.Arrays;
+import java.util.List;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import frc.robot.subsystems.autoAlign;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean constants. This
@@ -48,6 +56,7 @@ public final class Constants
     public static final String cameraName = "photonvision";
     public static final double distanceToTag = 16 * 2.54;
 
+
     //Arm Constants
     public final int beamBreakId = 0;
 
@@ -57,7 +66,21 @@ public final class Constants
   public static final class RobotConstants{
 
     public static final double elevatorHeight = 28.0;
-    
+  }
+
+  public enum AutoAlignStates {
+
+    BLUE_INTAKE(Arrays.asList(0, new Pose2d(new Translation2d(10, 20), Rotation2d.fromDegrees(30))));
+
+    private final List<Object> pose;
+
+    AutoAlignStates(List<Object> pose) {
+        this.pose = pose;
+    }
+
+    public List<Object> getPose() {
+        return pose;
+    }
 
   }
 }

@@ -40,6 +40,7 @@ import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.autoAlign;
 import frc.robot.subsystems.vision;
 
 import static edu.wpi.first.wpilibj2.command.Commands.either;

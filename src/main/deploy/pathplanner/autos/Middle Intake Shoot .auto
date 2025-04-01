@@ -29,6 +29,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "defaultState"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "MiddleToIntake"

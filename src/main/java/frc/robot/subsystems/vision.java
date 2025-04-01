@@ -32,6 +32,7 @@ public class vision extends SubsystemBase{
         private final CommandSwerveDrivetrain drivetrain;
     
         public vision(CommandSwerveDrivetrain drivetrain){ 
+            
             prevPose2d = drivetrain.getState().Pose;
             visionSim = new VisionSystemSim("main");
             camera = new PhotonCamera(Constants.OperatorConstants.cameraName);

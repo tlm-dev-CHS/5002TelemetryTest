@@ -18,8 +18,6 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 
-import dev.doglog.DogLog;
-import dev.doglog.DogLogOptions;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -78,14 +76,14 @@ public class RobotContainer {
     public CommandXboxController joystick = new CommandXboxController(0);
     private final Joystick coJoystick = new Joystick(1);
 
-    private final JoystickButton l2Button = new JoystickButton(coJoystick, 7);
-    private final JoystickButton l3Button = new JoystickButton(coJoystick, 6);
-    private final JoystickButton l4Button = new JoystickButton(coJoystick, 5);
-    private final JoystickButton defaultButton = new JoystickButton(coJoystick, 14);
-    private final JoystickButton intakeButton = new JoystickButton(coJoystick, 8);
-    private final JoystickButton a2Button = new JoystickButton(coJoystick, 12);
-    private final JoystickButton a3Button = new JoystickButton(coJoystick, 11);
-    private final JoystickButton climbButton = new JoystickButton(coJoystick, 13                                );
+    private final JoystickButton l2Button = new JoystickButton(coJoystick, 1);
+    private final JoystickButton l3Button = new JoystickButton(coJoystick, 2);
+    private final JoystickButton l4Button = new JoystickButton(coJoystick, 3);
+    private final JoystickButton defaultButton = new JoystickButton(coJoystick, 5);
+    private final JoystickButton intakeButton = new JoystickButton(coJoystick, 4);
+    private final JoystickButton a2Button = new JoystickButton(coJoystick, 6);
+    private final JoystickButton a3Button = new JoystickButton(coJoystick, 7);
+    private final JoystickButton climbButton = new JoystickButton(coJoystick, 8);
 
     public final CommandSwerveDrivetrain drivetrain; 
     //public final autoAlign align; 
@@ -109,12 +107,6 @@ public class RobotContainer {
         System.out.println("NO MODE");
       
       }
-
-      DogLog.setOptions(
-        new DogLogOptions().withNtPublish(true)
-      );
-
-      DogLog.setPdh(new PowerDistribution());
 
       //REGISTER AUTO COMMANDS
       NamedCommands.registerCommand("intake", intakeOnce());

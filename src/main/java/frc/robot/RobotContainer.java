@@ -195,7 +195,7 @@ public class RobotContainer {
         //Collect State
         intakeButton.onTrue(collectState());
 
-        //Score Coral
+        //Score Coralt
         l2Button.onTrue(l2State());
         l3Button.onTrue(l3State());
         l4Button.onTrue(l4State());

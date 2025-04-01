@@ -20,36 +20,46 @@ public class autoRotate extends SubsystemBase{
     private final CommandSwerveDrivetrain driveTrain;
     private final SwerveRequest.FieldCentric requester;
 
-    private final PIDController rController;
+    private final vision vision;
+
+    private final PIDController rPidController;
     private final PIDController xPidController;
     private final PIDController yPidController;
 
-    public autoRotate(CommandSwerveDrivetrain driveTrain){
+    public autoRotate(CommandSwerveDrivetrain driveTrain, vision vision){
+
+        this.vision = vision;
 
         this.driveTrain = driveTrain;
         currentPose = driveTrain.getState().Pose;
         requester = new SwerveRequest.FieldCentric();
 
-        rController = new PIDController(0.1, 0.0, 0.0);
+        rPidController = new PIDController(0.1, 0.0, 0.0);
         xPidController = new PIDController(0.1, 0.0, 0.0);
         yPidController = new PIDController(0.1, 0.0, 0.0);
 
         xPidController.setTolerance(0.1);     
         yPidController.setTolerance(0.1); 
-        rController.setTolerance(1);
+        rPidController.setTolerance(1);
 
     }
 
-    public void moveToState(Enum goalPosition, vision vision){
+    public void moveToState(Enum goalPosition){
         
         PhotonTrackedTarget target = vision.getTracked();
         var goal = ((AutoAlignStates) goalPosition).getPose();
 
-        var j = Constants.AutoAlignStates.BLUE_INTAKE.getPose();
-        Pose2d pose = (Pose2d) j.get(1);
-        int k = (int) j.get(0);
+        int goalTag = (int) goal.get(0);
+        Pose2d goalPose = (Pose2d) goal.get(1);
 
-        
+        if (target != null && target.getFiducialId() == goalTag){
+
+            double rOutput = rPidController.calculate(driveTrain.getState().Pose.getRotation().getRadians(), goalPose.getRotation().getRadians());
+            double xOutput = xPidController.calculate(driveTrain.getState().Pose.getX(), goalPose.getX());
+            double yOutput = yPidController.calculate(driveTrain.getState().Pose.getY(), goalPose.getY());
+
+            driveTrain.setControl(requester.withVelocityX(xOutput).withVelocityY(yOutput).withRotationalRate(rOutput));
+        }
     
     }
 }

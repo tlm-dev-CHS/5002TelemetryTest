@@ -301,11 +301,11 @@ public class RobotContainer {
   }
 
   public Command collectState(){
-    return changeState(19.87, 141.5);
+    return changeState(19.87, 149.43);
   }
 
   public Command l4State(){
-    return changeState(27.63, -41.8);
+    return changeState(27.95, -41.8);
   }
 
   public Command l3State(){
@@ -352,8 +352,9 @@ public class RobotContainer {
   public Command align(){
     return run(()->{
       align.moveToState(Constants.AutoAlignStates.BLUE_INTAKE);
-    }).finallyDo(()->
-    
+    }).until(()->(drivetrain.getState().Pose.getY() >= 2.85 && drivetrain.getState().Pose.getY() <= 3.15) && 
+                  (drivetrain.getState().Pose.getX() >= 14.57 && drivetrain.getState().Pose.getX() <= 14.27))
+                  .finallyDo(()->
     drivetrain.applyRequest(() -> drive
      .withVelocityX(-joystick.getLeftY() * MaxSpeed)
      .withVelocityY(-joystick.getLeftX() * MaxSpeed)

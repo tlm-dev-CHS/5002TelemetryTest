@@ -34,13 +34,15 @@ public class autoRotate extends SubsystemBase{
         currentPose = driveTrain.getState().Pose;
         requester = new SwerveRequest.FieldCentric();
 
-        rPidController = new PIDController(0.1, 0.0, 0.0);
-        xPidController = new PIDController(0.1, 0.0, 0.0);
-        yPidController = new PIDController(0.1, 0.0, 0.0);
+        rPidController = new PIDController(0.15, 0.0, 0.0);
+        xPidController = new PIDController(5, 0.0, 0.5);
+        yPidController = new PIDController(5, 0.0, 0.5);
+
 
         xPidController.setTolerance(0.1);     
         yPidController.setTolerance(0.1); 
         rPidController.setTolerance(1);
+    
 
     }
 
@@ -52,12 +54,19 @@ public class autoRotate extends SubsystemBase{
         int goalTag = (int) goal.get(0);
         Pose2d goalPose = (Pose2d) goal.get(1);
 
-        double rOutput = rPidController.calculate(driveTrain.getState().Pose.getRotation().getDegrees(), 168);
-        double xOutput = xPidController.calculate(driveTrain.getState().Pose.getX(), 14.42);
-        double yOutput = yPidController.calculate(driveTrain.getState().Pose.getY(), 4.5);
+        double rOutput = rPidController.calculate(driveTrain.getState().Pose.getRotation().getDegrees(), 170);
+        double xOutput = -xPidController.calculate(driveTrain.getState().Pose.getX(), 14.42);
+        double yOutput = -yPidController.calculate(driveTrain.getState().Pose.getY(), 4.5);
 
-        driveTrain.setControl(requester.withVelocityX(xOutput).withVelocityY(yOutput).withRotationalRate(rOutput));
+        driveTrain.setControl(requester.withVelocityY(yOutput).withVelocityX(xOutput));
     
+    }
+
+    @Override
+
+    public void periodic(){
+        PhotonTrackedTarget target = vision.getTracked();
+        
     }
 }
 

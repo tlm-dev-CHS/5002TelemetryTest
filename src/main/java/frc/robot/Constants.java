@@ -6,7 +6,10 @@ package frc.robot;
 
 import java.lang.Thread.State;
 import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -70,17 +73,122 @@ public final class Constants
 
   public enum AutoAlignStates {
 
-    BLUE_INTAKE(Arrays.asList(7, new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))));
+    BLUE_POS_1_LEFT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
+    BLUE_POS_1_RIGHT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
 
-    private final List<Object> pose;
+    BLUE_POS_2_LEFT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
+    BLUE_POS_2_RIGHT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
 
-    AutoAlignStates(List<Object> pose) {
+    BLUE_POS_3_LEFT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
+    BLUE_POS_3_RIGHT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
+
+    BLUE_POS_4_LEFT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
+    BLUE_POS_4_RIGHT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
+
+    BLUE_POS_5_LEFT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
+    BLUE_POS_5_RIGHT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
+
+    BLUE_POS_6_LEFT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
+    BLUE_POS_6_RIGHT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
+
+    RED_POS_1_LEFT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
+    RED_POS_1_RIGHT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
+
+    RED_POS_2_LEFT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
+    RED_POS_2_RIGHT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
+
+    RED_POS_3_LEFT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
+    RED_POS_3_RIGHT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
+
+    RED_POS_4_LEFT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
+    RED_POS_4_RIGHT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
+
+    RED_POS_5_LEFT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
+    RED_POS_5_RIGHT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
+
+    RED_POS_6_LEFT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168))),
+    RED_POS_6_RIGHT(new Pose2d(new Translation2d(14.42, 4.5), Rotation2d.fromDegrees(168)));
+
+    private final Pose2d pose;
+
+    AutoAlignStates(Pose2d pose) {
         this.pose = pose;
     }
 
-    public List<Object> getPose() {
+    public Pose2d getPose() {
         return pose;
     }
+  }
 
+  public static final Map<String, Map> autoAlignSide;
+
+  public static final Map<String, Map> blueAutoPoses;
+  public static final Map<String, Map> redAutoPoses;
+
+  public static final Map<Integer, Pose2d> blueAutoPosesRight;
+  public static final Map<Integer, Pose2d> blueAutoPosesLeft;
+
+  public static final Map<Integer, Pose2d> redAutoPosesRight;
+  public static final Map<Integer, Pose2d> redAutoPosesLeft;
+
+
+  static {
+    autoAlignSide = new HashMap<>();
+
+    blueAutoPoses = new HashMap<>();
+    redAutoPoses = new HashMap<>();
+
+    blueAutoPosesRight = new HashMap<>();
+    blueAutoPosesLeft = new HashMap<>();
+
+    redAutoPosesRight = new HashMap<>();
+    redAutoPosesLeft = new HashMap<>();
+
+    blueAutoPosesRight.put(21, AutoAlignStates.BLUE_POS_1_RIGHT.getPose());
+    blueAutoPosesLeft.put(21,AutoAlignStates.BLUE_POS_1_LEFT.getPose());
+
+    blueAutoPosesRight.put(22, AutoAlignStates.BLUE_POS_2_RIGHT.getPose());
+    blueAutoPosesLeft.put(22,AutoAlignStates.BLUE_POS_2_LEFT.getPose());
+
+    blueAutoPosesRight.put(17, AutoAlignStates.BLUE_POS_3_RIGHT.getPose());
+    blueAutoPosesLeft.put(17,AutoAlignStates.BLUE_POS_3_LEFT.getPose());
+
+    blueAutoPosesRight.put(18, AutoAlignStates.BLUE_POS_4_RIGHT.getPose());
+    blueAutoPosesLeft.put(18,AutoAlignStates.BLUE_POS_4_LEFT.getPose());
+
+    blueAutoPosesRight.put(19, AutoAlignStates.BLUE_POS_5_RIGHT.getPose());
+    blueAutoPosesLeft.put(19,AutoAlignStates.BLUE_POS_5_LEFT.getPose());
+
+    blueAutoPosesRight.put(20, AutoAlignStates.BLUE_POS_6_RIGHT.getPose());
+    blueAutoPosesLeft.put(20,AutoAlignStates.BLUE_POS_6_LEFT.getPose());
+
+    redAutoPosesRight.put(10, AutoAlignStates.RED_POS_1_RIGHT.getPose());
+    redAutoPosesLeft.put(10,AutoAlignStates.BLUE_POS_1_LEFT.getPose());
+
+    redAutoPosesRight.put(9, AutoAlignStates.RED_POS_2_RIGHT.getPose());
+    redAutoPosesLeft.put(9,AutoAlignStates.BLUE_POS_2_LEFT.getPose());
+
+    redAutoPosesRight.put(8, AutoAlignStates.RED_POS_3_RIGHT.getPose());
+    redAutoPosesLeft.put(8,AutoAlignStates.BLUE_POS_3_LEFT.getPose());
+
+    redAutoPosesRight.put(7, AutoAlignStates.RED_POS_4_RIGHT.getPose());
+    redAutoPosesLeft.put(7,AutoAlignStates.BLUE_POS_4_LEFT.getPose());
+
+    redAutoPosesRight.put(6, AutoAlignStates.RED_POS_5_RIGHT.getPose());
+    redAutoPosesLeft.put(6,AutoAlignStates.BLUE_POS_5_LEFT.getPose());
+
+    redAutoPosesRight.put(11, AutoAlignStates.RED_POS_6_RIGHT.getPose());
+    redAutoPosesLeft.put(11,AutoAlignStates.BLUE_POS_6_LEFT.getPose());
+
+    blueAutoPoses.put("Right", blueAutoPosesRight);
+    blueAutoPoses.put("Left", blueAutoPosesLeft);
+
+    redAutoPoses.put("Right", redAutoPosesRight);
+    redAutoPoses.put("Left", redAutoPosesLeft);
+
+    autoAlignSide.put("Blue", blueAutoPoses);
+    autoAlignSide.put("Red", redAutoPoses);
+    
+    
   }
 }

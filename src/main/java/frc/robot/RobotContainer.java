@@ -19,6 +19,7 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
@@ -54,6 +55,8 @@ import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.jar.Attributes.Name;
 
@@ -150,8 +153,8 @@ public class RobotContainer {
       joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
       
       //Auto Allign to April Tag
-      joystick.leftBumper().whileTrue(align());
-      joystick.rightBumper().whileTrue(strafe(0.75));
+      joystick.leftBumper().whileTrue(alignToLeft());
+      joystick.rightBumper().whileTrue(alignToRight());
 
       //Use Shooter
       joystick.rightTrigger().whileTrue(shoot());
@@ -349,16 +352,42 @@ public class RobotContainer {
     //     .withRotationalRate(-joystick.getRightX() * MaxAngularRate)));
     }
 
-  public Command align(){
-    return run(()->{
-      align.moveToState(Constants.AutoAlignStates.BLUE_INTAKE);
-    }).until(()->(drivetrain.getState().Pose.getY() >= 2.85 && drivetrain.getState().Pose.getY() <= 3.15) && 
-                  (drivetrain.getState().Pose.getX() >= 14.57 && drivetrain.getState().Pose.getX() <= 14.27))
-                  .finallyDo(()->
-    drivetrain.applyRequest(() -> drive
-     .withVelocityX(-joystick.getLeftY() * MaxSpeed)
-     .withVelocityY(-joystick.getLeftX() * MaxSpeed)
-     .withRotationalRate(-joystick.getRightX() * MaxAngularRate)));
+
+  public Command alignToRight(){
+    Map poses = align.currentPose;
+    poses = (Map) poses.get("Right");
+    Pose2d selectedPose = (Pose2d) poses.get(vision.getTracked());
+    double xPos = selectedPose.getX();
+    double yPos = selectedPose.getY();
+
+    return run(()->{align.moveToState(xPos, yPos);}).
+            until(()->((drivetrain.getState().Pose.getX() >= xPos - 0.05 && drivetrain.getState().Pose.getX() <= xPos + 0.05) &&
+                      (drivetrain.getState().Pose.getY() >= yPos - 0.05 && drivetrain.getState().Pose.getY() <= yPos + 0.05))).
+            finallyDo(()->{
+              drive
+              .withVelocityX(-joystick.getLeftY() * MaxSpeed)
+              .withVelocityY(-joystick.getLeftX() * MaxSpeed)
+              .withRotationalRate(-joystick.getRightX() * MaxAngularRate);
+            });
+  }
+
+  public Command alignToLeft(){
+
+    Map poses = align.currentPose;
+    poses = (Map) poses.get("Left");
+    Pose2d selectedPose = (Pose2d) poses.get(vision.getTracked());
+    double xPos = selectedPose.getX();
+    double yPos = selectedPose.getY();
+    
+    return run(()->{align.moveToState(xPos, yPos);}).
+            until(()->((drivetrain.getState().Pose.getX() >= xPos - 0.05 && drivetrain.getState().Pose.getX() <= xPos + 0.05) &&
+                      (drivetrain.getState().Pose.getY() >= yPos - 0.05 && drivetrain.getState().Pose.getY() <= yPos + 0.05))).
+            finallyDo(()->{
+              drive
+              .withVelocityX(-joystick.getLeftY() * MaxSpeed)
+              .withVelocityY(-joystick.getLeftX() * MaxSpeed)
+              .withRotationalRate(-joystick.getRightX() * MaxAngularRate);
+            });
   }
 
   

@@ -19,19 +19,19 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 1.0
+            "waitTime": 0.25
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "shoot"
+            "name": "intake"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "defaultState"
+            "name": "collectState"
           }
         },
         {
@@ -41,9 +41,27 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "shoot"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "intakeToScore"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "l4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot"
           }
         }
       ]

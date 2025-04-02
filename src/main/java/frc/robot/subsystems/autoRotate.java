@@ -35,8 +35,8 @@ public class autoRotate extends SubsystemBase{
         requester = new SwerveRequest.FieldCentric();
 
         rPidController = new PIDController(0.15, 0.0, 0.0);
-        xPidController = new PIDController(5, 0.0, 0.5);
-        yPidController = new PIDController(5, 0.0, 0.5);
+        xPidController = new PIDController(3, 0.0, 0.5);
+        yPidController = new PIDController(3, 0.0, 0.5);
 
 
         xPidController.setTolerance(0.1);     

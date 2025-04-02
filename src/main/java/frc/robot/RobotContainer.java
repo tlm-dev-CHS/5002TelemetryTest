@@ -277,11 +277,11 @@ public class RobotContainer {
     return run(()->{intake.runIntake(-4);},  intake).finallyDo(()->intake.runIntake(0.5));
   }
   public Command intakeOnce(){
-    return sequence(runOnce(()->{intake.runIntake(-8);}, intake), waitSeconds(3.0), runOnce(()->{intake.stopIntake();}, intake));
+    return sequence(runOnce(()->{intake.runIntake(-8);}, intake), waitSeconds(0.5), runOnce(()->{intake.stopIntake();}, intake));
   }
 
   public Command shootOnce(){
-    return sequence(runOnce(()->{intake.runIntake(8);}, intake), waitSeconds(0.5), runOnce(()->{intake.stopIntake();}, intake));
+    return sequence(runOnce(()->{intake.runIntake(8);}, intake), waitSeconds(1.), runOnce(()->{intake.stopIntake();}, intake));
   }
   public Command stopShoot(){
     return runOnce(()->{intake.runIntake(0.0);}, intake);
@@ -301,7 +301,7 @@ public class RobotContainer {
   }
 
   public Command collectState(){
-    return changeState(19.87, 149.43);
+    return changeState(19.87, 147.43);
   }
 
   public Command l4State(){

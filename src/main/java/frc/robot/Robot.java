@@ -7,6 +7,7 @@ package frc.robot;
 import java.security.KeyStore.PrivateKeyEntry;
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -30,7 +31,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit(){
-    
+    PortForwarder.add(5800,"photonvision", 5800);
   }
 
   @Override

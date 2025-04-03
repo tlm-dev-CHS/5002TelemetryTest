@@ -133,16 +133,16 @@ public final class Constants
 
 
   static {
-    autoAlignSide = new HashMap<>();
+    autoAlignSide = new HashMap<String, Map>();
 
-    blueAutoPoses = new HashMap<>();
-    redAutoPoses = new HashMap<>();
+    blueAutoPoses = new HashMap<String, Map>();
+    redAutoPoses = new HashMap<String, Map>();
 
-    blueAutoPosesRight = new HashMap<>();
-    blueAutoPosesLeft = new HashMap<>();
+    blueAutoPosesRight = new HashMap<Integer, Pose2d>();
+    blueAutoPosesLeft = new HashMap<Integer, Pose2d>();
 
-    redAutoPosesRight = new HashMap<>();
-    redAutoPosesLeft = new HashMap<>();
+    redAutoPosesRight = new HashMap<Integer, Pose2d>();
+    redAutoPosesLeft = new HashMap<Integer, Pose2d>();
 
     blueAutoPosesRight.put(21, AutoAlignStates.BLUE_POS_1_RIGHT.getPose());
     blueAutoPosesLeft.put(21,AutoAlignStates.BLUE_POS_1_LEFT.getPose());

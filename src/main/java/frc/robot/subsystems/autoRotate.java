@@ -65,24 +65,24 @@ public class autoRotate extends SubsystemBase{
         
         }
     
-        @Override
+        // @Override
     
-        public void periodic(){
-            PhotonTrackedTarget target = vision.getTracked();
+    //     public void periodic(){
+    //         PhotonTrackedTarget target = vision.getTracked();
     
-            if (target !=null){ 
-                var color = DriverStation.getAlliance();
-                if (color.isPresent() && color.get() == DriverStation.Alliance.Blue){
-                    currentPose = Constants.autoAlignSide.get("Blue");
-            }
-            else if (color.isPresent() && color.get() == DriverStation.Alliance.Red){
-                currentPose = Constants.autoAlignSide.get("Red");
-            }
-            //if (robot.)
-           // currentPose = Constants.autoAlignSide.get(target)
-        }
+    //         if (target !=null){ 
+    //             var color = DriverStation.getAlliance();
+    //             if (color.isPresent() && color.get() == DriverStation.Alliance.Blue){
+    //                 currentPose = Constants.autoAlignSide.get("Blue");
+    //         }
+    //         else if (color.isPresent() && color.get() == DriverStation.Alliance.Red){
+    //             currentPose = Constants.autoAlignSide.get("Red");
+    //         }
+    //         //if (robot.)
+    //        // currentPose = Constants.autoAlignSide.get(target)
+    //     }
         
-    }
+    // }
 }
 
 

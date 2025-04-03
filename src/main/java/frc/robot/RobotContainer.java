@@ -153,8 +153,8 @@ public class RobotContainer {
       joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
       
       //Auto Allign to April Tag
-      joystick.leftBumper().whileTrue(alignToLeft());
-      joystick.rightBumper().whileTrue(alignToRight());
+      // joystick.leftBumper().whileTrue(alignToLeft());
+      // joystick.rightBumper().whileTrue(alignToRight());
 
       //Use Shooter
       joystick.rightTrigger().whileTrue(shoot());
@@ -371,24 +371,24 @@ public class RobotContainer {
             });
   }
 
-  public Command alignToLeft(){
+  // public Command alignToLeft(){
 
-    Map poses = align.currentPose;
-    poses = (Map) poses.get("Left");
-    Pose2d selectedPose = (Pose2d) poses.get(vision.getTracked());
-    double xPos = selectedPose.getX();
-    double yPos = selectedPose.getY();
+  //   Map poses = align.currentPose;
+  //   poses = (Map) poses.get("Left");
+  //   Pose2d selectedPose = (Pose2d) poses.get(vision.getTracked());
+  //   double xPos = selectedPose.getX();
+  //   double yPos = selectedPose.getY();
     
-    return run(()->{align.moveToState(xPos, yPos);}).
-            until(()->((drivetrain.getState().Pose.getX() >= xPos - 0.05 && drivetrain.getState().Pose.getX() <= xPos + 0.05) &&
-                      (drivetrain.getState().Pose.getY() >= yPos - 0.05 && drivetrain.getState().Pose.getY() <= yPos + 0.05))).
-            finallyDo(()->{
-              drive
-              .withVelocityX(-joystick.getLeftY() * MaxSpeed)
-              .withVelocityY(-joystick.getLeftX() * MaxSpeed)
-              .withRotationalRate(-joystick.getRightX() * MaxAngularRate);
-            });
-  }
+  //   return run(()->{align.moveToState(xPos, yPos);}).
+  //           until(()->((drivetrain.getState().Pose.getX() >= xPos - 0.05 && drivetrain.getState().Pose.getX() <= xPos + 0.05) &&
+  //                     (drivetrain.getState().Pose.getY() >= yPos - 0.05 && drivetrain.getState().Pose.getY() <= yPos + 0.05))).
+  //           finallyDo(()->{
+  //             drive
+  //             .withVelocityX(-joystick.getLeftY() * MaxSpeed)
+  //             .withVelocityY(-joystick.getLeftX() * MaxSpeed)
+  //             .withRotationalRate(-joystick.getRightX() * MaxAngularRate);
+  //           });
+  // }
 
   
   public Command getAutonomousCommand() {

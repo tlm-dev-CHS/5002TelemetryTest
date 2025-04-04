@@ -18,6 +18,7 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -29,7 +30,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.OperatorConstants;
-
+@Logged
 public class Arm extends SubsystemBase {
     
     final SparkMax m_armRotator = new SparkMax(OperatorConstants.m_armRotator, MotorType.kBrushless);
@@ -39,7 +40,7 @@ public class Arm extends SubsystemBase {
     final RelativeEncoder encoder = m_armRotator.getEncoder();
     final AbsoluteEncoder rotatorAbsoluteEncoder = m_armRotator.getAbsoluteEncoder();
 
-    PIDController m_controller = new PIDController(0.15, 0, 0);
+    ProfiledPIDController m_controller = new ProfiledPIDController(0.1, 0, 0.01, new TrapezoidProfile.Constraints(99, 99));
     public double goal = 0.0;
     double factor = 0.0;
 
@@ -65,8 +66,6 @@ public class Arm extends SubsystemBase {
     
         m_armRotator.configure(rotatorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        m_controller.reset();
-
         m_controller.setTolerance(2);
         setPosition(0.0);
     }
@@ -76,7 +75,6 @@ public class Arm extends SubsystemBase {
     }
 
     public void setPosition(double position){
-        m_controller.reset();
         goal = position;
     }
     public Command runArm(){

@@ -89,7 +89,7 @@ public class autoRotate extends SubsystemBase{
                     this.controller = controller;
     
             this.driveTrain = driveTrain;
-            currentPose = new Pose2d[6];
+            currentPose = new Pose2d[6];    
             requester = new SwerveRequest.FieldCentric();
     
             rPidController = new PIDController(0.15, 0.0, 0.0);
@@ -107,8 +107,8 @@ public class autoRotate extends SubsystemBase{
             Pose2d goalPose = getAlignmentReefPose(left);
 
             double rOutput = rPidController.calculate(driveTrain.getState().Pose.getRotation().getDegrees(), goalPose.getRotation().getDegrees());
-            double xOutput = -xPidController.calculate(driveTrain.getState().Pose.getX(), goalPose.getX());
-            double yOutput = -yPidController.calculate(driveTrain.getState().Pose.getX(), goalPose.getY());
+            double xOutput = xPidController.calculate(driveTrain.getState().Pose.getX(), goalPose.getX());
+            double yOutput = yPidController.calculate(driveTrain.getState().Pose.getX(), goalPose.getY());
     
             driveTrain.setControl(requester.withVelocityY(yOutput).withVelocityX(xOutput));
         
@@ -134,6 +134,7 @@ public class autoRotate extends SubsystemBase{
                     controller.setRumble(RumbleType.kBothRumble, 0.0);
             }
         }
-}
+
+    }
 
 

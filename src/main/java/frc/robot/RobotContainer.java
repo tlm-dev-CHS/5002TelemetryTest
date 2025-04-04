@@ -18,15 +18,19 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 
+import edu.wpi.first.epilogue.Epilogue;
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
@@ -59,7 +63,7 @@ import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.jar.Attributes.Name;
 
-
+@Logged
 public class RobotContainer {
 
     public double xPos = 0.0;
@@ -103,6 +107,9 @@ public class RobotContainer {
 
     public RobotContainer() {
 
+      SmartDashboard.putData("Scheduler", CommandScheduler.getInstance());
+      //DataLogManager.start();      
+
       mode.setDefaultOption("Competition", false);
       mode.addOption("Calibrate", true);
 
@@ -130,7 +137,7 @@ public class RobotContainer {
       autoChooser = AutoBuilder.buildAutoChooser("Middle L4 Intake");
       SmartDashboard.putData("Auto Mode", autoChooser);
       
-      vision = new vision(drivetrain);
+      vision = new vision(drivetrain, joystick);
       align = new autoRotate(drivetrain, vision, joystick);
     }
 
@@ -155,10 +162,10 @@ public class RobotContainer {
       joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
       
       //Auto Allign to April Tag
-      // joystick.leftBumper().whileTrue(strafe(-0.60));
-      // joystick.rightBumper().whileTrue(strafe(0.60));
-      // joystick.leftBumper().whileTrue(Align(true));
-      // joystick.rightBumper().whileTrue(Align(false));
+      joystick.leftBumper().whileTrue(strafe(-0.5));
+      joystick.rightBumper().whileTrue(strafe(0.5));
+      joystick.leftBumper().whileTrue(Align(true));
+      joystick.rightBumper().whileTrue(Align(false));
 
       //Use Shooter
       joystick.rightTrigger().whileTrue(shoot());
@@ -223,12 +230,14 @@ public class RobotContainer {
     return
       either(
         sequence(
+          runOnce(()-> System.out.println("Ran")),
           runOnce(()->{arm.setPosition(0);}),
           waitUntil(()->Math.abs(arm.getMeasurement()) < 30),
           runOnce(()->{elevator.moveToPosition(elevatorPosition);}),
           waitUntil(()->elevator.getMeasurement() > elevatorPosition - 5 && elevator.getMeasurement() < elevatorPosition + 5),
           runOnce(()->{arm.setPosition(armPosition);})),
         sequence(
+          runOnce(()-> System.out.println("Ran")),
           runOnce(()->{elevator.moveToPosition(elevatorPosition);}),
           waitUntil(()->elevator.getMeasurement() > elevatorPosition - 5 && elevator.getMeasurement() < elevatorPosition + 5),
           runOnce(()->{arm.setPosition(armPosition);})),
@@ -288,7 +297,7 @@ public class RobotContainer {
   }
 
   public Command shootOnce(){
-    return sequence(runOnce(()->{intake.runIntake(8);}, intake), waitSeconds(1.), runOnce(()->{intake.stopIntake();}, intake));
+    return sequence(runOnce(()->{intake.runIntake(8);}, intake), waitSeconds(2), runOnce(()->{intake.stopIntake();}, intake));
   }
   public Command stopShoot(){
     return runOnce(()->{intake.runIntake(0.0);}, intake);

@@ -9,8 +9,12 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.PhotonUtils;
+import org.photonvision.estimation.TargetModel;
+import org.photonvision.simulation.PhotonCameraSim;
+import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 
+import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -20,7 +24,9 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants;
 
 public class vision extends SubsystemBase{
@@ -31,16 +37,31 @@ public class vision extends SubsystemBase{
         private final PhotonPoseEstimator photonPoseEstimator;
         private final VisionSystemSim visionSim;
         private final CommandSwerveDrivetrain drivetrain;
+        private final SimCameraProperties cameraProp;
+       private final PhotonCameraSim cameraSim;
+        private final CommandXboxController controller;
+        private final TargetModel targetModel;
     
-        public vision(CommandSwerveDrivetrain drivetrain){ 
+        public vision(CommandSwerveDrivetrain drivetrain, CommandXboxController controller){ 
             
             prevPose2d = drivetrain.getState().Pose;
-            visionSim = new VisionSystemSim("main");
+            this.controller = controller;
+            
+
             camera = new PhotonCamera(Constants.OperatorConstants.cameraName);
             aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
-            visionSim.addAprilTags(aprilTagFieldLayout);
+    
             robotToCam = new Transform3d(new Translation3d(0.3302, 0.1016, 0.3048), new Rotation3d(0,0,0));
             photonPoseEstimator =  new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, robotToCam);
+
+            visionSim = new VisionSystemSim("main");
+            visionSim.addAprilTags(aprilTagFieldLayout);
+            targetModel = new TargetModel(0.1651, 0.1651);
+            visionSim.addAprilTags(Constants.OperatorConstants.layout);
+            cameraProp = new SimCameraProperties();
+            cameraSim = new PhotonCameraSim(camera, cameraProp);
+
+            visionSim.addCamera(cameraSim, robotToCam);
     
             this.drivetrain = drivetrain;
     
@@ -49,6 +70,8 @@ public class vision extends SubsystemBase{
         public PhotonPipelineResult getResult(){
             return camera.getLatestResult();
         }
+
+
     
         public PhotonTrackedTarget getTracked(){
             PhotonPipelineResult result = getResult();
@@ -76,6 +99,9 @@ public class vision extends SubsystemBase{
     
         @Override
         public void periodic(){
+
+            SmartDashboard.putNumber("Joystick X", controller.getLeftX());
+            SmartDashboard.putNumber("Joystick Y", controller.getLeftY());
             PhotonPipelineResult result = getResult();
             if (result != null && result.hasTargets()){
                 
@@ -88,6 +114,7 @@ public class vision extends SubsystemBase{
                 var timestamp = result.getTimestampSeconds();
                 System.out.println(timestamp);
                 drivetrain.addVisionMeasurement(pose, timestamp);
+                visionSim.update(pose);
             }
 
         }

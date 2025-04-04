@@ -95,12 +95,12 @@ public final class Constants
     blueAutoPoses[4] = (OperatorConstants.layout.getTagPose(19).get().toPose2d());
     blueAutoPoses[5] = (OperatorConstants.layout.getTagPose(20).get().toPose2d());
 
-    redAutoPoses[0] = (OperatorConstants.layout.getTagPose(21).get().toPose2d());
-    redAutoPoses[1] = (OperatorConstants.layout.getTagPose(21).get().toPose2d());
-    redAutoPoses[2] = (OperatorConstants.layout.getTagPose(21).get().toPose2d());
-    redAutoPoses[3] = (OperatorConstants.layout.getTagPose(21).get().toPose2d());
-    redAutoPoses[4] = (OperatorConstants.layout.getTagPose(21).get().toPose2d());
-    redAutoPoses[5] = (OperatorConstants.layout.getTagPose(21).get().toPose2d());
+    redAutoPoses[0] = (OperatorConstants.layout.getTagPose(10).get().toPose2d());
+    redAutoPoses[1] = (OperatorConstants.layout.getTagPose(9).get().toPose2d());
+    redAutoPoses[2] = (OperatorConstants.layout.getTagPose(8).get().toPose2d());
+    redAutoPoses[3] = (OperatorConstants.layout.getTagPose(7).get().toPose2d());
+    redAutoPoses[4] = (OperatorConstants.layout.getTagPose(6).get().toPose2d());
+    redAutoPoses[5] = (OperatorConstants.layout.getTagPose(11).get().toPose2d());
 
     autoAlignSide.put("Blue", blueAutoPoses);
     autoAlignSide.put("Red", redAutoPoses);

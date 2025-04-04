@@ -6,6 +6,8 @@ package frc.robot;
 
 import java.security.KeyStore.PrivateKeyEntry;
 
+import edu.wpi.first.epilogue.Epilogue;
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -16,7 +18,7 @@ import frc.robot.RobotContainer.*;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.vision;
-
+@Logged
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
@@ -26,6 +28,7 @@ public class Robot extends TimedRobot {
   private final boolean kUseLimelight = false;
 
   public Robot() {
+    Epilogue.bind(this);
     m_robotContainer = new RobotContainer();
   }
 

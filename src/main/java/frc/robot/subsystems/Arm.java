@@ -67,7 +67,7 @@ public class Arm extends SubsystemBase {
 
         m_controller.reset();
 
-        m_controller.setTolerance(1);
+        m_controller.setTolerance(2);
         setPosition(0.0);
     }
 
@@ -115,5 +115,6 @@ public class Arm extends SubsystemBase {
         SmartDashboard.putData("Arm Pid", m_controller);
         SmartDashboard.putNumber("Arm Output", m_controller.calculate(getMeasurement()));
         SmartDashboard.putBoolean("Arm At Goal", m_controller.atSetpoint());
+        SmartDashboard.putNumber("Abolute Encoder", rotatorAbsoluteEncoder.getPosition());
     }
 }

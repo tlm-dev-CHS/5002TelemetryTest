@@ -39,7 +39,6 @@ import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.autoAlign;
 import frc.robot.subsystems.autoRotate;
 import frc.robot.subsystems.vision;
 
@@ -132,7 +131,7 @@ public class RobotContainer {
       SmartDashboard.putData("Auto Mode", autoChooser);
       
       vision = new vision(drivetrain);
-      align = new autoRotate(drivetrain, vision);
+      align = new autoRotate(drivetrain, vision, joystick);
     }
 
     public void configureBindings() {
@@ -156,8 +155,10 @@ public class RobotContainer {
       joystick.back().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
       
       //Auto Allign to April Tag
-      joystick.leftBumper().whileTrue(alignToLeft());
-      joystick.rightBumper().whileTrue(alignToRight());
+      // joystick.leftBumper().whileTrue(strafe(-0.60));
+      // joystick.rightBumper().whileTrue(strafe(0.60));
+      // joystick.leftBumper().whileTrue(Align(true));
+      // joystick.rightBumper().whileTrue(Align(false));
 
       //Use Shooter
       joystick.rightTrigger().whileTrue(shoot());
@@ -231,7 +232,7 @@ public class RobotContainer {
           runOnce(()->{elevator.moveToPosition(elevatorPosition);}),
           waitUntil(()->elevator.getMeasurement() > elevatorPosition - 5 && elevator.getMeasurement() < elevatorPosition + 5),
           runOnce(()->{arm.setPosition(armPosition);})),
-      ()->Math.abs(arm.getMeasurement()) > 25).until(armElevatorAtGoal()).withInterruptBehavior(InterruptionBehavior.kCancelSelf);
+      ()->arm.getMeasurement() < 0 || (Math.abs(arm.getMeasurement()) > 90 && elevatorPosition < elevator.getMeasurement())).until(armElevatorAtGoal()).withInterruptBehavior(InterruptionBehavior.kCancelSelf);
   }
 
   //ELEVATOR COMMANDS
@@ -259,11 +260,11 @@ public class RobotContainer {
 
 
   public Command armCounterClockwise(){
-    return run(()->arm.runMotor(2.0)).finallyDo(()->arm.stop());
+    return run(()->arm.runMotor(1.0)).finallyDo(()->arm.stop());
   }
 
   public Command armClockwise(){
-    return run(()->arm.runMotor(-2.0)).finallyDo(()->arm.stop());
+    return run(()->arm.runMotor(-1.0)).finallyDo(()->arm.stop());
   }
 
   public Command stopArm(){
@@ -356,22 +357,11 @@ public class RobotContainer {
     }
 
 
-  public Command alignToRight(){
-    Pose2d selectedPose = null;
-    xPos = 0.0;
-    yPos = 0.0;
-    Map poses = align.currentPose;
-    poses = (Map) poses.get("Right");
-    if (vision.getTracked() != null){
-      selectedPose = (Pose2d) poses.get(vision.getTracked());
-      xPos = selectedPose.getX();
-      yPos = selectedPose.getY();
-    }
-
+  public Command Align(boolean left){
     return run(()->{
-      if (vision.getTracked()!= null){align.moveToState(xPos, yPos);}}).
-            until(()->((drivetrain.getState().Pose.getX() >= xPos - 0.05 && drivetrain.getState().Pose.getX() <= xPos + 0.05) &&
-                      (drivetrain.getState().Pose.getY() >= yPos - 0.05 && drivetrain.getState().Pose.getY() <= yPos + 0.05))).
+      align.moveToState(left);}).
+            until(()->((drivetrain.getState().Pose.getX() >= align.returnGoalPose2d(left).getX() -0.05 && drivetrain.getState().Pose.getX() <= align.returnGoalPose2d(left).getX() + 0.05) &&
+                      (drivetrain.getState().Pose.getY() >= align.returnGoalPose2d(left).getY() - 0.05 && drivetrain.getState().Pose.getY() <= align.returnGoalPose2d(left).getY() + 0.05))).
             finallyDo(()->{
               drive
               .withVelocityX(-joystick.getLeftY() * MaxSpeed)
@@ -380,32 +370,7 @@ public class RobotContainer {
             });
   }
 
-  public Command alignToLeft(){
 
-    Pose2d selectedPose = null;
-    xPos = 0.0;
-    yPos = 0.0;
-    Map poses = align.currentPose;
-    poses = (Map) poses.get("Left");
-    if (vision.getTracked() != null){
-      selectedPose = (Pose2d) poses.get(vision.getTracked());
-      xPos = selectedPose.getX();
-      yPos = selectedPose.getY();
-    }
-    
-    
-    
-    return run(()->{
-      if (vision.getTracked()!= null){align.moveToState(xPos, yPos);}}).
-            until(()->((drivetrain.getState().Pose.getX() >= xPos - 0.05 && drivetrain.getState().Pose.getX() <= xPos + 0.05) &&
-                      (drivetrain.getState().Pose.getY() >= yPos - 0.05 && drivetrain.getState().Pose.getY() <= yPos + 0.05))).
-            finallyDo(()->{
-              drive
-              .withVelocityX(-joystick.getLeftY() * MaxSpeed)
-              .withVelocityY(-joystick.getLeftX() * MaxSpeed)
-              .withRotationalRate(-joystick.getRightX() * MaxAngularRate);
-            });
-  }
 
   
   public Command getAutonomousCommand() {
